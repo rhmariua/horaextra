@@ -75,6 +75,10 @@ legend{font:600 13px var(--f-display);text-transform:uppercase;letter-spacing:.0
 .dur{padding:9px 12px;border-radius:6px;background:var(--bg);font-weight:600}
 .dur.over{background:var(--bad-soft);color:var(--bad)}
 .dur.ok{background:var(--ok-soft);color:var(--ok)}
+.dia{padding:8px 12px;border-radius:6px;font-weight:600;background:var(--warn-soft);color:var(--warn)}
+.dur .not{display:block;font-weight:500;margin-top:4px}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--warn-soft);color:var(--warn);margin-top:3px}
+.tag.n{background:#e7e9f7;color:#3b4a9a}
 .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:9px 16px;font-weight:600;cursor:pointer;text-decoration:none;color:inherit}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
@@ -242,6 +246,7 @@ table.equipe th,table.equipe td{padding:7px 10px}
             <div class="f s2"><label for="data">Data</label><input id="data" type="date"></div>
             <div class="f s2"><label for="inicio">Início</label><input id="inicio" type="time" step="300"></div>
             <div class="f s2"><label for="fim">Término</label><input id="fim" type="time" step="300"></div>
+            <div class="f hidden" id="dia-wrap"><div class="dia" id="dia" aria-live="polite"></div></div>
             <div class="f"><div class="dur" id="dur" aria-live="polite">Informe início e término para calcular a duração.</div></div>
             <div class="f s2"><label for="motivo_tipo">Tipo de motivo</label><select id="motivo_tipo"><option value="">Selecione…</option></select></div>
             <div class="f s4"><label for="os">Nº OS / nota</label><input id="os" autocomplete="off" placeholder="Ex.: OS 2026-118734"></div>
@@ -354,6 +359,7 @@ table.equipe th,table.equipe td{padding:7px 10px}
 const CFG = Object.assign({ CONTRATOS:[], MOTIVOS:[], CARGOS:[], EMPRESA:"MARIUA CONSTRUCAO E ENERGIA LTDA", MUNICIPIO_PADRAO:"Manaus" }, window.HE_CONFIG || {});
 const $ = (s) => document.querySelector(s);
 const LEGAL = 'Nos termos do art. 59 da CLT, a jornada diária poderá ser acrescida de, no máximo, 2 (duas) horas extras, limite que não pode ser excedido na hora extra aqui autorizada. Os colaboradores deverão registrar normalmente esta hora extra no sistema de controle de ponto. Este termo é um instrumento de controle interno e não substitui o registro de ponto, tampouco afeta o direito ao pagamento das horas efetivamente trabalhadas.';
+const LEGAL_REPOUSO = 'Trata-se de trabalho em dia de repouso (domingo ou feriado), previamente autorizado pelo gestor, limitado a 8 (oito) horas por colaborador. Os colaboradores deverão registrar normalmente estas horas no sistema de controle de ponto. Este termo é um instrumento de controle interno e não substitui o registro de ponto, tampouco afeta o direito ao pagamento das horas efetivamente trabalhadas e dos adicionais devidos.';
 const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const LABEL = { pendente:'Pendente', aprovado:'Aprovada', reprovado:'Reprovada', cancelado:'Cancelada' };
 
@@ -374,6 +380,12 @@ const linkPara = (id, token) => `${baseUrl()}#s=${encodeURIComponent(id)}&t=${en
 const soDigitos = (s) => String(s||'').replace(/\D/g,'');
 function cpfValido(c){ c=soDigitos(c); if(c.length!==11||/^(\d)\1{10}$/.test(c)) return false; for(let t=9;t<11;t++){ let s=0; for(let i=0;i<t;i++) s+=+c[i]*(t+1-i); if(((s*10)%11)%10!==+c[t]) return false; } return true; }
 function docMasc(d){ const x=soDigitos(d); if(x.length===11 && !/[^\d.\-\s]/.test(String(d||''))) return 'CPF ***.'+x.slice(3,6)+'.'+x.slice(6,9)+'-**'; return d ? 'Mat. '+d : ''; }
+function noturnoMin(a,b){ const s0=toMin(a), d=durMin(a,b); if(s0==null||d==null) return 0; const e=s0+d; const ov=(x,y)=>Math.max(0,Math.min(e,y)-Math.max(s0,x)); return ov(0,300)+ov(1320,1740); }
+const reduzida = (m) => Math.round(m*60/52.5);
+const TIPO_LBL = { util:'Dia útil', sabado:'Sábado', domingo:'Domingo', feriado:'Feriado' };
+function tipoDiaLocal(data){ if(!data) return {tipo:'util',nome:'Dia útil',limite:120}; const md=data.slice(5); const fx={'01-01':'Confraternização Universal','04-21':'Tiradentes','05-01':'Dia do Trabalho','09-07':'Independência do Brasil','10-12':'Nossa Senhora Aparecida','11-02':'Finados','11-15':'Proclamação da República','11-20':'Dia da Consciência Negra','12-25':'Natal'}; if(fx[md]) return {tipo:'feriado',nome:fx[md],limite:480}; const w=new Date(data+'T12:00:00').getDay(); if(w===0) return {tipo:'domingo',nome:'Domingo',limite:480}; if(w===6) return {tipo:'sabado',nome:'Sábado',limite:120}; return {tipo:'util',nome:'Dia útil',limite:120}; }
+function limTxt(d){ return d.limite===120 ? 'limite de 2h por dia (art. 59 da CLT)' : `limite de ${d.limite/60}h por colaborador (${d.tipo==='feriado'?'feriado':d.nome.toLowerCase()})`; }
+function diaTxt(s){ if(!s.tipo_dia||s.tipo_dia==='util') return ''; return s.tipo_dia==='feriado' ? 'Feriado'+(s.feriado_nome?': '+s.feriado_nome:'') : TIPO_LBL[s.tipo_dia]; }
 function waNumero(s){ let d=soDigitos(s); if(!d) return ''; if(d.length<=11) d='55'+d; return d; }
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add('hidden'),3000); }
 function note(msg, kind='info'){ const n=$('#status-note'); if(!msg){ n.classList.add('hidden'); return; } n.className='note '+kind; n.textContent=msg; }
@@ -409,12 +421,12 @@ const DEMO = (() => {
     he_criar({p}){
       for(const f of ['base','municipio','contrato','data','inicio','fim','motivo_tipo','motivo','solicitante_nome','solicitante_doc','gestor_nome','gestor_cargo','gestor_contato','equipe','viatura','local_servico','os']) if(!String(p[f]||'').trim()) fail('Campo obrigatório não preenchido: '+f);
       if(p.motivo.trim().length<15) fail('Detalhe melhor a justificativa (mínimo de 15 caracteres).');
-      const d=durMin(p.inicio,p.fim); if(d>120) fail('A hora extra ultrapassa o limite de 2 horas por dia (art. 59 da CLT).');
+      const d=durMin(p.inicio,p.fim); const td=tipoDiaLocal(p.data); if(d>td.limite) fail('Ultrapassa o '+limTxt(td)+'.');
       if(!p.colaboradores.length) fail('Informe pelo menos um colaborador.');
       const m=minDia(p.data), seen=new Set();
-      for(const c of p.colaboradores){ const k=chave(c.nome,c.matricula); if(seen.has(k)) fail('Colaborador repetido na lista: '+c.nome); seen.add(k); if((m[k]||0)+d>120) fail(`${c.nome} já tem ${m[k]} min de hora extra solicitada em ${fmtData(p.data)}. O total passaria de 2h (art. 59 da CLT).`); }
+      for(const c of p.colaboradores){ const k=chave(c.nome,c.matricula); if(seen.has(k)) fail('Colaborador repetido na lista: '+c.nome); seen.add(k); if((m[k]||0)+d>td.limite) fail(`${c.nome} já tem ${m[k]} min de hora extra solicitada em ${fmtData(p.data)}. O total passaria do ${limTxt(td)}.`); }
       const now=new Date(); const id='HE'+String(now.getFullYear()).slice(2)+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+tok().slice(0,4).toUpperCase();
-      const s={...p, id, empresa:CFG.EMPRESA, criado_em:now.toISOString(), duracao_min:d, status:'pendente', token_ver:tok(), token_aprovar:tok()};
+      const s={...p, id, empresa:CFG.EMPRESA, criado_em:now.toISOString(), duracao_min:d, tipo_dia:td.tipo, feriado_nome:td.tipo==='feriado'?td.nome:null, minutos_noturnos:noturnoMin(p.inicio,p.fim), status:'pendente', token_ver:tok(), token_aprovar:tok()};
       const a=all(); a.push(s); save(a); return {id, token_ver:s.token_ver, token_aprovar:s.token_aprovar};
     },
     he_obter({p_id,p_token}){ const s=find(p_id); if(!s||(p_token!==s.token_ver&&p_token!==s.token_aprovar)) fail('Solicitação não encontrada ou link inválido.'); return pub(s,p_token); },
@@ -426,6 +438,7 @@ const DEMO = (() => {
       Object.assign(s,{status:p_status, decidido_por:p_nome.trim(), decidido_em:new Date().toISOString(), decisao_obs:String(p_obs||'').trim()||null}); save(a); return pub(s,p_token);
     },
     he_cancelar({p_id,p_token}){ const a=all(); const s=a.find(x=>x.id===p_id); if(!s||(p_token!==s.token_ver&&p_token!==s.token_aprovar)) fail('Link inválido.'); if(s.status!=='pendente') fail('Só é possível cancelar solicitações pendentes.'); Object.assign(s,{status:'cancelado',cancelado_em:new Date().toISOString()}); save(a); return pub(s,p_token); },
+    he_tipo_dia({p_data}){ return tipoDiaLocal(p_data); },
     he_listar({p_codigo,p_de,p_ate}){ if(p_codigo!=='demo') fail('Código do painel incorreto. (No modo demonstração o código é: demo)'); return all().filter(s=>(!p_de||s.data>=p_de)&&(!p_ate||s.data<=p_ate)).sort((x,y)=>y.criado_em.localeCompare(x.criado_em)); }
   };
 })();
@@ -482,7 +495,8 @@ $('#btn-paste').addEventListener('click',()=>{
   toast(n?`${n} colaborador${n>1?'es':''} incluído${n>1?'s':''}.`:'Nenhuma linha reconhecida.');
 });
 
-let limite = {}; let limiteT; let limiteReq=0;
+let limite = {}; let limiteT; let limiteReq=0; let dia = {tipo:'util',nome:'Dia útil',limite:120}; let diaReq=0;
+async function buscarDia(){ const data=$('#data').value, base=$('#base').value; const my=++diaReq; let r=null; try{ r=await rpc('he_tipo_dia',{p_data:data||null, p_base:base}); }catch(e){} if(my!==diaReq) return; dia = r || tipoDiaLocal(data); const w=$('#dia-wrap'); if(dia.tipo==='util'){ w.classList.add('hidden'); } else { w.classList.remove('hidden'); $('#dia').textContent = dia.tipo==='feriado' ? `Feriado: ${dia.nome} — dia de repouso, limite de 8h por colaborador.` : dia.tipo==='domingo' ? 'Domingo — dia de repouso, limite de 8h por colaborador.' : 'Sábado (meio expediente) — limite de 2h além da jornada do dia.'; } updDur(); }
 function onChange(){ renum(); updDur(); clearTimeout(limiteT); limiteT=setTimeout(buscarLimite, 500); }
 async function buscarLimite(){
   const cols=readCols().filter(c=>c.nome); const data=$('#data').value;
@@ -490,20 +504,23 @@ async function buscarLimite(){
   const my=++limiteReq;
   try{ const r=await rpc('he_limite',{p_data:data, p_colaboradores:cols.map(c=>({nome:c.nome,matricula:c.matricula}))}); if(my===limiteReq){ limite=r||{}; updDur(); } }catch(e){}
 }
-function excedentes(){ const m=durMin($('#inicio').value,$('#fim').value); if(m==null) return []; return readCols().filter(c=>c.nome).map(c=>({...c, ja:limite[chave(c.nome,c.matricula)]||0})).filter(c=>c.ja+m>120); }
+function excedentes(){ const m=durMin($('#inicio').value,$('#fim').value); if(m==null) return []; return readCols().filter(c=>c.nome).map(c=>({...c, ja:limite[chave(c.nome,c.matricula)]||0})).filter(c=>c.ja+m>dia.limite); }
 function updDur(){
   const box=$('#dur'); const m=durMin($('#inicio').value,$('#fim').value);
   box.className='dur'; [...$('#cols').children].forEach(r=>r.classList.remove('over'));
   if(m==null){ box.textContent='Informe início e término para calcular a duração.'; return; }
   const n=readCols().filter(c=>c.nome).length;
-  if(m>120){ box.classList.add('over'); box.textContent=`Duração: ${fmtDur(m)}. Acima do limite de 2h por dia (art. 59 da CLT).`; return; }
+  const nt=noturnoMin($('#inicio').value,$('#fim').value); const ntTxt = nt>0 ? `Inclui ${fmtDur(nt)} em horário noturno (22h–5h): adicional noturno, equivale a ${fmtDur(reduzida(nt))} em hora noturna reduzida.` : '';
+  const addNt=()=>{ if(ntTxt){ const sp=document.createElement('span'); sp.className='not'; sp.textContent=ntTxt; box.appendChild(sp); } };
+  if(m>dia.limite){ box.classList.add('over'); box.textContent=`Duração: ${fmtDur(m)}. Acima do ${limTxt(dia)}.`; return; }
   const ex=excedentes();
-  if(ex.length){ ex.forEach(c=>c.row.classList.add('over')); box.classList.add('over'); box.textContent=`Duração: ${fmtDur(m)}. Ultrapassa 2h no dia para: ${ex.map(c=>`${c.nome} (já tem ${fmtDur(c.ja)} solicitadas)`).join(', ')}.`; return; }
-  box.classList.add('ok'); box.textContent=`Duração: ${fmtDur(m)} por pessoa${n>1?` · ${n} colaboradores = ${fmtDur(m*n)} homem-hora`:''}. Dentro do limite de 2h por dia.`;
+  if(ex.length){ ex.forEach(c=>c.row.classList.add('over')); box.classList.add('over'); box.textContent=`Duração: ${fmtDur(m)}. Ultrapassa o ${limTxt(dia)} para: ${ex.map(c=>`${c.nome} (já tem ${fmtDur(c.ja)} solicitadas)`).join(', ')}.`; return; }
+  box.classList.add('ok'); box.textContent=`Duração: ${fmtDur(m)} por pessoa${n>1?` · ${n} colaboradores = ${fmtDur(m*n)} homem-hora`:''}. Dentro do ${limTxt(dia)}.`; addNt();
 }
 ['inicio','fim'].forEach(id=>$('#'+id).addEventListener('input',updDur));
-$('#data').addEventListener('change',onChange);
-$('#form').addEventListener('reset',()=>setTimeout(()=>{ $('#cols').innerHTML=''; addCol(); defaults(); $('#form-err').classList.add('hidden'); limite={}; updDur(); },0));
+$('#data').addEventListener('change',()=>{ onChange(); buscarDia(); });
+$('#base').addEventListener('change',buscarDia);
+$('#form').addEventListener('reset',()=>setTimeout(()=>{ $('#cols').innerHTML=''; addCol(); defaults(); $('#form-err').classList.add('hidden'); limite={}; buscarDia(); },0));
 
 function showErr(msg){ const b=$('#form-err'); b.textContent=msg; b.classList.remove('hidden'); b.scrollIntoView({block:'center',behavior:'smooth'}); }
 $('#form').addEventListener('submit', async (e)=>{
@@ -517,7 +534,7 @@ $('#form').addEventListener('submit', async (e)=>{
   { const d=v('solicitante_doc'), dg=soDigitos(d); if(dg.length===11 && !/[^\d.\-\s]/.test(d) && !cpfValido(d)) return showErr('CPF do solicitante inválido. Confira os números ou informe a matrícula.'); if(d.length<3) return showErr('Informe sua matrícula ou CPF completo.'); }
   if(soDigitos(v('gestor_contato')).length<10) return showErr('WhatsApp do gestor inválido. Informe com DDD, ex.: (75) 99999-0000.');
   const seen=new Set(); for(const c of cols){ const k=chave(c.nome,c.matricula); if(seen.has(k)) return showErr('Colaborador repetido na lista: '+c.nome+'.'); seen.add(k); }
-  const m=durMin(v('inicio'),v('fim')); if(m>120) return showErr('A hora extra ultrapassa o limite de 2 horas por dia (art. 59 da CLT). Ajuste o horário.');
+  const m=durMin(v('inicio'),v('fim')); if(m>dia.limite) return showErr('Ultrapassa o '+limTxt(dia)+'. Ajuste o horário.');
   if(v('motivo').length<15) return showErr('Detalhe melhor a justificativa (mínimo de 15 caracteres).');
   const p={ base:v('base'), municipio:v('municipio'), contrato:v('contrato'), equipe:v('equipe'), viatura:v('viatura'), local_servico:v('local_servico'),
     data:v('data'), inicio:v('inicio'), fim:v('fim'), motivo_tipo:v('motivo_tipo'), os:v('os'), motivo:v('motivo'),
@@ -558,6 +575,8 @@ function renderDetail(){
       <dt>Contrato</dt><dd>${esc(s.contrato)}${s.equipe?` · ${esc(s.equipe)}`:''}${s.viatura?` · Viatura ${esc(s.viatura)}`:''}</dd>
       ${s.local_servico?`<dt>Local do serviço</dt><dd>${esc(s.local_servico)}</dd>`:''}
       <dt>Data e horário previsto</dt><dd class="num">${fmtData(s.data)}, das ${hm(s.inicio)} às ${hm(s.fim)} (${fmtDur(dm)})</dd>
+      ${diaTxt(s)?`<dt>Tipo de dia</dt><dd><b>${esc(diaTxt(s))}</b>${s.tipo_dia==='domingo'||s.tipo_dia==='feriado'?' · dia de repouso':''}</dd>`:''}
+      ${s.minutos_noturnos>0?`<dt>Horário noturno</dt><dd>${fmtDur(s.minutos_noturnos)} entre 22h e 5h (adicional noturno) · ${fmtDur(reduzida(s.minutos_noturnos))} em hora noturna reduzida</dd>`:''}
       <dt>Motivo</dt><dd><b>${esc(s.motivo_tipo)}</b>${s.os?` · ${esc(s.os)}`:''}<br>${esc(s.motivo)}</dd>
       <dt>Solicitante</dt><dd>${esc(s.solicitante_nome)}${s.solicitante_doc?` · ${esc(docMasc(s.solicitante_doc))}`:''}</dd>
       <dt>Colaboradores</dt><dd>${cols.length} pessoa${cols.length>1?'s':''} · ${fmtDur(dm*cols.length)} homem-hora</dd>
@@ -565,7 +584,7 @@ function renderDetail(){
     <div class="tbl-wrap"><table class="equipe"><thead><tr><th>#</th><th>Nome</th><th>Matrícula</th><th>Cargo / função</th><th class="print-only">Assinatura</th></tr></thead><tbody>
       ${cols.map((c,i)=>`<tr><td class="num">${i+1}</td><td><b>${esc(c.nome)}</b></td><td class="num">${esc(c.matricula||'–')}</td><td>${esc(c.cargo)}</td><td class="print-only sigcell"></td></tr>`).join('')}
     </tbody></table></div>
-    <p class="legal">${esc(LEGAL)} Por ser expressão da verdade, firmamos a presente declaração.</p>
+    <p class="legal">${esc(s.tipo_dia==='domingo'||s.tipo_dia==='feriado'?LEGAL_REPOUSO:LEGAL)} Por ser expressão da verdade, firmamos a presente declaração.</p>
     <p>${esc(s.municipio)}, ${fmtDataExt(s.criado_em)}.</p>
     <div class="sig"><b>${esc(st==='aprovado'||st==='reprovado' ? s.decidido_por : s.gestor_nome)}</b>${esc(s.gestor_cargo)}<br>
       ${st==='aprovado'?`<span class="stamp-ok">Aprovado eletronicamente em ${fmtTs(s.decidido_em)}</span>`:st==='reprovado'?`<span style="color:var(--bad);font-weight:600">Reprovado em ${fmtTs(s.decidido_em)}</span>`:'<span class="help">Aguardando decisão</span>'}</div>
@@ -586,7 +605,7 @@ function renderDetail(){
   if(mostrarEnvio){
     const link=linkPara(s.id, tApr);
     $('#link-aprovar').value=link;
-    const msg=`*Autorização de hora extra* – ${s.id}\n${cols.length} colaborador${cols.length>1?'es':''}${s.equipe?` (${s.equipe})`:''}\n${fmtData(s.data)}, ${hm(s.inicio)}–${hm(s.fim)}\nBase: ${s.base||'-'} · ${s.contrato}\nMotivo: ${s.motivo_tipo}\nSolicitante: ${s.solicitante_nome}${s.solicitante_doc?' ('+docMasc(s.solicitante_doc)+')':''}\n\nAprovar ou reprovar: ${link}`;
+    const msg=`*Autorização de hora extra* – ${s.id}\n${cols.length} colaborador${cols.length>1?'es':''}${s.equipe?` (${s.equipe})`:''}\n${fmtData(s.data)}, ${hm(s.inicio)}–${hm(s.fim)}${diaTxt(s)?'\nDia: '+diaTxt(s):''}${s.minutos_noturnos>0?'\nNoturno: '+fmtDur(s.minutos_noturnos)+' (22h–5h)':''}\nBase: ${s.base||'-'} · ${s.contrato}\nMotivo: ${s.motivo_tipo}\nSolicitante: ${s.solicitante_nome}${s.solicitante_doc?' ('+docMasc(s.solicitante_doc)+')':''}\n\nAprovar ou reprovar: ${link}`;
     const num=waNumero(s.gestor_contato); $('#wa-dest').textContent = s.gestor_nome + (s.gestor_contato ? ' ('+s.gestor_contato+')' : '');
     $('#btn-wa').href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   }
@@ -651,7 +670,7 @@ function renderPainel(){
     return `<tr data-id="${esc(s.id)}" data-t="${esc(s.token_ver)}" tabindex="0">
       <td class="mono">${esc(s.id)}</td>
       <td><b>${esc(cols.length===1?cols[0].nome:`${cols[0]?cols[0].nome:''} + ${cols.length-1}`)}</b><div class="sub">${cols.length} colaborador${cols.length>1?'es':''}${s.equipe?' · '+esc(s.equipe):''}</div></td>
-      <td class="num">${fmtData(s.data)}<div class="sub">${hm(s.inicio)}–${hm(s.fim)} · ${fmtDur(s.duracao_min)}</div></td>
+      <td class="num">${fmtData(s.data)}<div class="sub">${hm(s.inicio)}–${hm(s.fim)} · ${fmtDur(s.duracao_min)}</div>${diaTxt(s)?`<span class="tag">${esc(diaTxt(s))}</span> `:''}${s.minutos_noturnos>0?`<span class="tag n">Noturno ${fmtDur(s.minutos_noturnos)}</span>`:''}</td>
       <td><b>${esc(s.base||'–')}</b><div class="sub">${esc(s.contrato)} · ${esc(s.motivo_tipo)}</div></td>
       <td>${esc(s.gestor_nome)}${s.decidido_por&&s.decidido_por!==s.gestor_nome?`<div class="sub">Decidido por ${esc(s.decidido_por)}</div>`:''}</td>
       <td><span class="pill ${s.status}">${LABEL[s.status]}</span></td>
@@ -674,15 +693,15 @@ $('#f-base').addEventListener('change',renderPainel);
 $('#btn-atualizar').addEventListener('click',carregarPainel);
 $('#btn-csv').addEventListener('click',()=>{
   const q=(x)=>'"'+String(x??'').replace(/"/g,'""')+'"';
-  const head=['Protocolo','Status','Base','Colaborador','Matrícula','Cargo','Equipe','Viatura','Contrato','Município','Local','Data','Início','Término','Horas','Tipo de motivo','OS','Justificativa','Solicitante','Matrícula/CPF solicitante','Gestor','Decidido por','Decidido em','Observação','Solicitado em'];
-  const lines=filtrados().flatMap(s=>(s.colaboradores||[]).map(c=>[s.id,LABEL[s.status],s.base,c.nome,c.matricula,c.cargo,s.equipe,s.viatura,s.contrato,s.municipio,s.local_servico,fmtData(s.data),hm(s.inicio),hm(s.fim),(s.duracao_min/60).toFixed(2).replace('.',','),s.motivo_tipo,s.os,s.motivo,s.solicitante_nome,s.solicitante_doc,s.gestor_nome,s.decidido_por,fmtTs(s.decidido_em),s.decisao_obs,fmtTs(s.criado_em)].map(q).join(';')));
+  const head=['Protocolo','Status','Base','Colaborador','Matrícula','Cargo','Equipe','Viatura','Contrato','Município','Local','Data','Tipo de dia','Feriado','Início','Término','Horas','Horas noturnas (22h-5h)','Horas noturnas reduzidas','Tipo de motivo','OS','Justificativa','Solicitante','Matrícula/CPF solicitante','Gestor','Decidido por','Decidido em','Observação','Solicitado em'];
+  const lines=filtrados().flatMap(s=>(s.colaboradores||[]).map(c=>[s.id,LABEL[s.status],s.base,c.nome,c.matricula,c.cargo,s.equipe,s.viatura,s.contrato,s.municipio,s.local_servico,fmtData(s.data),TIPO_LBL[s.tipo_dia]||'',s.feriado_nome||'',hm(s.inicio),hm(s.fim),(s.duracao_min/60).toFixed(2).replace('.',','),((s.minutos_noturnos||0)/60).toFixed(2).replace('.',','),(reduzida(s.minutos_noturnos||0)/60).toFixed(2).replace('.',','),s.motivo_tipo,s.os,s.motivo,s.solicitante_nome,s.solicitante_doc,s.gestor_nome,s.decidido_por,fmtTs(s.decidido_em),s.decisao_obs,fmtTs(s.criado_em)].map(q).join(';')));
   const blob=new Blob(['﻿'+[head.map(q).join(';'),...lines].join('\r\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Horas_Extras_${$('#mes').value||mesAtual()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
 });
 
 /* ---------- início ---------- */
 if(!REMOTE) $('#demo-band').classList.remove('hidden');
-addCol(); defaults();
+addCol(); defaults(); buscarDia();
 if(!location.hash) history.replaceState(null,'','#nova');
 route();
 })();
