@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<script src="config.js"></script>
+<script>document.write('<script src="config.js?v='+Date.now()+'"><\/script>');</script>
 <style>
 :root{
   --bg:#eef1f2; --surface:#ffffff; --ink:#14212c; --muted:#5b6b78; --line:#d5dde2;
@@ -205,8 +205,9 @@ table.equipe th,table.equipe td{padding:7px 10px}
         <fieldset>
           <legend>Quem está solicitando</legend>
           <div class="grid">
-            <div class="f s3"><label for="solicitante_nome">Seu nome</label><input id="solicitante_nome" autocomplete="name" placeholder="Ex.: Raimundo Lopes (encarregado)"></div>
-            <div class="f s3"><label for="solicitante_contato">Seu WhatsApp <span class="opt">(opcional)</span></label><input id="solicitante_contato" type="tel" inputmode="tel" placeholder="(92) 99999-0000"></div>
+            <div class="f s2"><label for="solicitante_nome">Seu nome</label><input id="solicitante_nome" autocomplete="name" placeholder="Ex.: Raimundo Lopes (encarregado)"></div>
+            <div class="f s2"><label for="solicitante_doc">Sua matrícula ou CPF</label><input id="solicitante_doc" autocomplete="off" inputmode="numeric" placeholder="Ex.: 004512 ou 000.000.000-00"></div>
+            <div class="f s2"><label for="solicitante_contato">Seu WhatsApp <span class="opt">(opcional)</span></label><input id="solicitante_contato" type="tel" inputmode="tel" placeholder="(92) 99999-0000"></div>
           </div>
         </fieldset>
         <fieldset>
@@ -371,6 +372,8 @@ const hoje = () => new Date(Date.now()-new Date().getTimezoneOffset()*60000).toI
 const baseUrl = () => location.href.split('#')[0];
 const linkPara = (id, token) => `${baseUrl()}#s=${encodeURIComponent(id)}&t=${encodeURIComponent(token)}`;
 const soDigitos = (s) => String(s||'').replace(/\D/g,'');
+function cpfValido(c){ c=soDigitos(c); if(c.length!==11||/^(\d)\1{10}$/.test(c)) return false; for(let t=9;t<11;t++){ let s=0; for(let i=0;i<t;i++) s+=+c[i]*(t+1-i); if(((s*10)%11)%10!==+c[t]) return false; } return true; }
+function docMasc(d){ const x=soDigitos(d); if(x.length===11 && !/[^\d.\-\s]/.test(String(d||''))) return 'CPF ***.'+x.slice(3,6)+'.'+x.slice(6,9)+'-**'; return d ? 'Mat. '+d : ''; }
 function waNumero(s){ let d=soDigitos(s); if(!d) return ''; if(d.length<=11) d='55'+d; return d; }
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add('hidden'),3000); }
 function note(msg, kind='info'){ const n=$('#status-note'); if(!msg){ n.classList.add('hidden'); return; } n.className='note '+kind; n.textContent=msg; }
@@ -404,7 +407,7 @@ const DEMO = (() => {
   return {
     he_limite({p_data, p_colaboradores}){ const m=minDia(p_data); const r={}; for(const c of p_colaboradores||[]){ const k=chave(c.nome,c.matricula); if(m[k]) r[k]=m[k]; } return r; },
     he_criar({p}){
-      for(const f of ['base','municipio','contrato','data','inicio','fim','motivo_tipo','motivo','solicitante_nome','gestor_nome','gestor_cargo','gestor_contato','equipe','viatura','local_servico','os']) if(!String(p[f]||'').trim()) fail('Campo obrigatório não preenchido: '+f);
+      for(const f of ['base','municipio','contrato','data','inicio','fim','motivo_tipo','motivo','solicitante_nome','solicitante_doc','gestor_nome','gestor_cargo','gestor_contato','equipe','viatura','local_servico','os']) if(!String(p[f]||'').trim()) fail('Campo obrigatório não preenchido: '+f);
       if(p.motivo.trim().length<15) fail('Detalhe melhor a justificativa (mínimo de 15 caracteres).');
       const d=durMin(p.inicio,p.fim); if(d>120) fail('A hora extra ultrapassa o limite de 2 horas por dia (art. 59 da CLT).');
       if(!p.colaboradores.length) fail('Informe pelo menos um colaborador.');
@@ -451,7 +454,7 @@ for(const c of CFG.CARGOS){ const o=document.createElement('option'); o.value=c;
 function defaults(){
   $('#municipio').value = CFG.MUNICIPIO_PADRAO; $('#data').value = hoje();
   const ub=store.get('he_base'); if(ub && BASES.some(b=>b.nome===ub)){ $('#base').value=ub; const b=BASES.find(x=>x.nome===ub); if(b.municipio) $('#municipio').value=b.municipio; }
-  const me = store.get('he_solicitante'); if(me){ $('#solicitante_nome').value=me.nome||''; $('#solicitante_contato').value=me.contato||''; }
+  const me = store.get('he_solicitante'); if(me){ $('#solicitante_nome').value=me.nome||''; $('#solicitante_doc').value=me.doc||''; $('#solicitante_contato').value=me.contato||''; }
 }
 
 function addCol(c={}){
@@ -506,11 +509,12 @@ function showErr(msg){ const b=$('#form-err'); b.textContent=msg; b.classList.re
 $('#form').addEventListener('submit', async (e)=>{
   e.preventDefault(); $('#form-err').classList.add('hidden');
   const v=(id)=>$('#'+id).value.trim();
-  const req={solicitante_nome:'Seu nome',base:'Base',contrato:'Contrato',municipio:'Município',data:'Data',inicio:'Início',fim:'Término',motivo_tipo:'Tipo de motivo',motivo:'Justificativa',gestor_nome:'Nome do gestor',gestor_cargo:'Cargo do gestor',gestor_contato:'WhatsApp do gestor',equipe:'Equipe / turma',viatura:'Viatura / placa',local_servico:'Local do serviço',os:'Nº OS / nota'};
+  const req={solicitante_nome:'Seu nome',solicitante_doc:'Sua matrícula ou CPF',base:'Base',contrato:'Contrato',municipio:'Município',data:'Data',inicio:'Início',fim:'Término',motivo_tipo:'Tipo de motivo',motivo:'Justificativa',gestor_nome:'Nome do gestor',gestor_cargo:'Cargo do gestor',gestor_contato:'WhatsApp do gestor',equipe:'Equipe / turma',viatura:'Viatura / placa',local_servico:'Local do serviço',os:'Nº OS / nota'};
   const errs=Object.keys(req).filter(k=>!v(k)).map(k=>req[k]);
   const cols=readCols(); if(!cols.length) errs.push('pelo menos um colaborador');
   if(errs.length) return showErr('Preencha: '+errs.join(', ')+'.');
   const inc=cols.filter(c=>!c.nome||!c.cargo||!c.matricula); if(inc.length){ inc.forEach(c=>c.row.classList.add('over')); return showErr('Informe nome, matrícula e cargo de todos os colaboradores.'); }
+  { const d=v('solicitante_doc'), dg=soDigitos(d); if(dg.length===11 && !/[^\d.\-\s]/.test(d) && !cpfValido(d)) return showErr('CPF do solicitante inválido. Confira os números ou informe a matrícula.'); if(d.length<3) return showErr('Informe sua matrícula ou CPF completo.'); }
   if(soDigitos(v('gestor_contato')).length<10) return showErr('WhatsApp do gestor inválido. Informe com DDD, ex.: (75) 99999-0000.');
   const seen=new Set(); for(const c of cols){ const k=chave(c.nome,c.matricula); if(seen.has(k)) return showErr('Colaborador repetido na lista: '+c.nome+'.'); seen.add(k); }
   const m=durMin(v('inicio'),v('fim')); if(m>120) return showErr('A hora extra ultrapassa o limite de 2 horas por dia (art. 59 da CLT). Ajuste o horário.');
@@ -518,12 +522,12 @@ $('#form').addEventListener('submit', async (e)=>{
   const p={ base:v('base'), municipio:v('municipio'), contrato:v('contrato'), equipe:v('equipe'), viatura:v('viatura'), local_servico:v('local_servico'),
     data:v('data'), inicio:v('inicio'), fim:v('fim'), motivo_tipo:v('motivo_tipo'), os:v('os'), motivo:v('motivo'),
     colaboradores:cols.map(c=>({nome:c.nome,matricula:c.matricula,cargo:c.cargo})),
-    solicitante_nome:v('solicitante_nome'), solicitante_contato:v('solicitante_contato'),
+    solicitante_nome:v('solicitante_nome'), solicitante_doc:v('solicitante_doc'), solicitante_contato:v('solicitante_contato'),
     gestor_nome:v('gestor_nome'), gestor_cargo:v('gestor_cargo'), gestor_contato:v('gestor_contato') };
   const btn=$('#btn-enviar'); btn.disabled=true; btn.textContent='Enviando…';
   try{
     const r = await rpc('he_criar',{p});
-    store.set('he_solicitante',{nome:p.solicitante_nome, contato:p.solicitante_contato});
+    store.set('he_solicitante',{nome:p.solicitante_nome, doc:p.solicitante_doc, contato:p.solicitante_contato});
     sess.set('apr:'+r.id, r.token_aprovar);
     $('#form').reset();
     location.hash = `s=${encodeURIComponent(r.id)}&t=${encodeURIComponent(r.token_ver)}`;
@@ -555,6 +559,7 @@ function renderDetail(){
       ${s.local_servico?`<dt>Local do serviço</dt><dd>${esc(s.local_servico)}</dd>`:''}
       <dt>Data e horário previsto</dt><dd class="num">${fmtData(s.data)}, das ${hm(s.inicio)} às ${hm(s.fim)} (${fmtDur(dm)})</dd>
       <dt>Motivo</dt><dd><b>${esc(s.motivo_tipo)}</b>${s.os?` · ${esc(s.os)}`:''}<br>${esc(s.motivo)}</dd>
+      <dt>Solicitante</dt><dd>${esc(s.solicitante_nome)}${s.solicitante_doc?` · ${esc(docMasc(s.solicitante_doc))}`:''}</dd>
       <dt>Colaboradores</dt><dd>${cols.length} pessoa${cols.length>1?'s':''} · ${fmtDur(dm*cols.length)} homem-hora</dd>
     </dl>
     <div class="tbl-wrap"><table class="equipe"><thead><tr><th>#</th><th>Nome</th><th>Matrícula</th><th>Cargo / função</th><th class="print-only">Assinatura</th></tr></thead><tbody>
@@ -566,7 +571,7 @@ function renderDetail(){
       ${st==='aprovado'?`<span class="stamp-ok">Aprovado eletronicamente em ${fmtTs(s.decidido_em)}</span>`:st==='reprovado'?`<span style="color:var(--bad);font-weight:600">Reprovado em ${fmtTs(s.decidido_em)}</span>`:'<span class="help">Aguardando decisão</span>'}</div>
     <div class="stamp-box">Carimbo da empresa (CNPJ)</div>`;
 
-  const tl=[`<li><span class="dot a"></span><div><b>Solicitada</b> por ${esc(s.solicitante_nome)}<br><span class="help">${fmtTs(s.criado_em)}</span></div></li>`];
+  const tl=[`<li><span class="dot a"></span><div><b>Solicitada</b> por ${esc(s.solicitante_nome)}${s.solicitante_doc?` (${esc(docMasc(s.solicitante_doc))})`:''}<br><span class="help">${fmtTs(s.criado_em)}</span></div></li>`];
   if(st==='aprovado'||st==='reprovado') tl.push(`<li><span class="dot ${st==='aprovado'?'ok':'bad'}"></span><div><b>${LABEL[st]}</b> por ${esc(s.decidido_por)}<br><span class="help">${fmtTs(s.decidido_em)}</span>${s.decisao_obs?`<div style="margin-top:4px">“${esc(s.decisao_obs)}”</div>`:''}</div></li>`);
   else if(st==='cancelado') tl.push(`<li><span class="dot"></span><div><b>Cancelada</b><br><span class="help">${fmtTs(s.cancelado_em)}</span></div></li>`);
   else tl.push(`<li><span class="dot p"></span><div><b>Aguardando</b> ${esc(s.gestor_nome)}</div></li>`);
@@ -581,7 +586,7 @@ function renderDetail(){
   if(mostrarEnvio){
     const link=linkPara(s.id, tApr);
     $('#link-aprovar').value=link;
-    const msg=`*Autorização de hora extra* – ${s.id}\n${cols.length} colaborador${cols.length>1?'es':''}${s.equipe?` (${s.equipe})`:''}\n${fmtData(s.data)}, ${hm(s.inicio)}–${hm(s.fim)}\nBase: ${s.base||'-'} · ${s.contrato}\nMotivo: ${s.motivo_tipo}\nSolicitante: ${s.solicitante_nome}\n\nAprovar ou reprovar: ${link}`;
+    const msg=`*Autorização de hora extra* – ${s.id}\n${cols.length} colaborador${cols.length>1?'es':''}${s.equipe?` (${s.equipe})`:''}\n${fmtData(s.data)}, ${hm(s.inicio)}–${hm(s.fim)}\nBase: ${s.base||'-'} · ${s.contrato}\nMotivo: ${s.motivo_tipo}\nSolicitante: ${s.solicitante_nome}${s.solicitante_doc?' ('+docMasc(s.solicitante_doc)+')':''}\n\nAprovar ou reprovar: ${link}`;
     const num=waNumero(s.gestor_contato); $('#wa-dest').textContent = s.gestor_nome + (s.gestor_contato ? ' ('+s.gestor_contato+')' : '');
     $('#btn-wa').href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   }
@@ -635,7 +640,7 @@ function porBase(){ const b=$('#f-base').value; return b ? P.lista.filter(s=>s.b
 function filtrados(){
   const q=norm(P.q);
   return porBase().filter(s=>{ if(P.filtro!=='todas'&&s.status!==P.filtro) return false; if(!q) return true;
-    return norm([s.id,s.base,s.contrato,s.equipe,s.viatura,s.gestor_nome,s.solicitante_nome,s.os,s.local_servico,...(s.colaboradores||[]).flatMap(c=>[c.nome,c.matricula,c.cargo])].join(' ')).includes(q); });
+    return norm([s.id,s.base,s.contrato,s.equipe,s.viatura,s.gestor_nome,s.solicitante_nome,s.solicitante_doc,s.os,s.local_servico,...(s.colaboradores||[]).flatMap(c=>[c.nome,c.matricula,c.cargo])].join(' ')).includes(q); });
 }
 function renderPainel(){
   let p=0,a=0,r=0,h=0;
@@ -669,8 +674,8 @@ $('#f-base').addEventListener('change',renderPainel);
 $('#btn-atualizar').addEventListener('click',carregarPainel);
 $('#btn-csv').addEventListener('click',()=>{
   const q=(x)=>'"'+String(x??'').replace(/"/g,'""')+'"';
-  const head=['Protocolo','Status','Base','Colaborador','Matrícula','Cargo','Equipe','Viatura','Contrato','Município','Local','Data','Início','Término','Horas','Tipo de motivo','OS','Justificativa','Solicitante','Gestor','Decidido por','Decidido em','Observação','Solicitado em'];
-  const lines=filtrados().flatMap(s=>(s.colaboradores||[]).map(c=>[s.id,LABEL[s.status],s.base,c.nome,c.matricula,c.cargo,s.equipe,s.viatura,s.contrato,s.municipio,s.local_servico,fmtData(s.data),hm(s.inicio),hm(s.fim),(s.duracao_min/60).toFixed(2).replace('.',','),s.motivo_tipo,s.os,s.motivo,s.solicitante_nome,s.gestor_nome,s.decidido_por,fmtTs(s.decidido_em),s.decisao_obs,fmtTs(s.criado_em)].map(q).join(';')));
+  const head=['Protocolo','Status','Base','Colaborador','Matrícula','Cargo','Equipe','Viatura','Contrato','Município','Local','Data','Início','Término','Horas','Tipo de motivo','OS','Justificativa','Solicitante','Matrícula/CPF solicitante','Gestor','Decidido por','Decidido em','Observação','Solicitado em'];
+  const lines=filtrados().flatMap(s=>(s.colaboradores||[]).map(c=>[s.id,LABEL[s.status],s.base,c.nome,c.matricula,c.cargo,s.equipe,s.viatura,s.contrato,s.municipio,s.local_servico,fmtData(s.data),hm(s.inicio),hm(s.fim),(s.duracao_min/60).toFixed(2).replace('.',','),s.motivo_tipo,s.os,s.motivo,s.solicitante_nome,s.solicitante_doc,s.gestor_nome,s.decidido_por,fmtTs(s.decidido_em),s.decisao_obs,fmtTs(s.criado_em)].map(q).join(';')));
   const blob=new Blob(['﻿'+[head.map(q).join(';'),...lines].join('\r\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Horas_Extras_${$('#mes').value||mesAtual()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
 });
