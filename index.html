@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Autorização de Hora Extra – Mariuá</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{
+  --bg:#eef1f2; --surface:#ffffff; --ink:#14212c; --muted:#5b6b78; --line:#d5dde2;
+  --accent:#0b6b70; --accent-ink:#ffffff; --accent-soft:#e1f0f0;
+  --ok:#1d7a3e; --ok-soft:#e3f3e8; --warn:#9a6400; --warn-soft:#fbf0d9; --bad:#b3261e; --bad-soft:#fbe5e3; --off:#6b7680; --off-soft:#eceff1;
+  --wa:#1f8f4e;
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f171d; --surface:#17222a; --ink:#e4ecf0; --muted:#94a5b1; --line:#2b3a44;
+    --accent:#4fb8b9; --accent-ink:#06191a; --accent-soft:#163536;
+    --ok:#62c98a; --ok-soft:#173326; --warn:#e6b14d; --warn-soft:#352a12; --bad:#f08279; --bad-soft:#3a1d1b; --off:#9aa6ae; --off-soft:#232f37;
+    --wa:#3fbf73;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+.mono{font-family:var(--f-mono);font-size:.92em;letter-spacing:.02em;white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+.hidden{display:none !important}
+
+header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.top-in{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand-mark{width:30px;height:30px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+.brand h1{font-size:17px}
+.brand small{display:block;color:var(--muted);font:500 12px var(--f-body)}
+nav.tabs{display:flex;gap:4px}
+nav.tabs a{padding:7px 12px;border-radius:6px;text-decoration:none;color:var(--muted);font-weight:500}
+nav.tabs a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.demo-band{background:var(--warn-soft);color:var(--warn);text-align:center;font-size:13px;padding:6px 16px;font-weight:500}
+
+main{max-width:1080px;margin:0 auto;padding:24px 20px 60px;display:grid;gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.pad{padding:20px}
+.note{padding:10px 14px;border-radius:6px;font-size:14px}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note.bad{background:var(--bad-soft);color:var(--bad)}
+.note.ok{background:var(--ok-soft);color:var(--ok)}
+.note.info{background:var(--accent-soft);color:var(--accent)}
+.help{font-size:12px;color:var(--muted)}
+
+/* formulário */
+form .grid{display:grid;align-items:start;grid-template-columns:repeat(6,1fr);gap:14px 16px}
+.f{display:grid;gap:5px;grid-column:span 6}
+.s2{grid-column:span 2}.s3{grid-column:span 3}.s4{grid-column:span 4}
+label{font-weight:600;font-size:13px}
+label .opt{font-weight:400;color:var(--muted)}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:9px 11px;width:100%}
+textarea{min-height:90px;resize:vertical}
+fieldset{border:0;padding:0;margin:0 0 24px}
+legend{font:600 13px var(--f-display);text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:12px;padding:0}
+.count{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+.dur{padding:9px 12px;border-radius:6px;background:var(--bg);font-weight:600}
+.dur.over{background:var(--bad-soft);color:var(--bad)}
+.dur.ok{background:var(--ok-soft);color:var(--ok)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:9px 16px;font-weight:600;cursor:pointer;text-decoration:none;color:inherit}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn.bad{background:transparent;color:var(--bad);border-color:var(--bad)}
+.btn.wa{background:var(--wa);color:#fff;border-color:var(--wa)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.cols{display:grid;gap:8px}
+.cols-head,.col-row{display:grid;grid-template-columns:28px minmax(0,2.2fr) minmax(0,1fr) minmax(0,1.6fr) 40px;gap:8px;align-items:center}
+.cols-head{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.col-row .n{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;font-size:13px}
+.col-row.over input{border-color:var(--bad)}
+.col-row .x{width:40px;height:40px;padding:0;border:1px solid var(--line);background:none;border-radius:6px;cursor:pointer;color:var(--muted);font-size:18px}
+.col-row .x:hover{color:var(--bad);border-color:var(--bad)}
+
+/* painel */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{padding:14px 16px;border-left:4px solid var(--line)}
+.stat b{display:block;font:700 26px var(--f-display)}
+.stat span{color:var(--muted);font-size:13px}
+.stat.p{border-left-color:var(--warn)}.stat.a{border-left-color:var(--ok)}.stat.r{border-left-color:var(--bad)}.stat.h{border-left-color:var(--accent)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.filters input[type=search]{flex:1 1 220px}
+.filters input[type=month]{width:auto}
+.chip{border:1px solid var(--line);background:transparent;border-radius:99px;padding:5px 12px;cursor:pointer;font-size:13px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:10px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+#rows tr{cursor:pointer}
+#rows tr:hover{background:var(--bg)}
+td .sub{color:var(--muted);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.pendente{background:var(--warn-soft);color:var(--warn)}
+.pill.aprovado{background:var(--ok-soft);color:var(--ok)}
+.pill.reprovado{background:var(--bad-soft);color:var(--bad)}
+.pill.cancelado{background:var(--off-soft);color:var(--off)}
+.flag{display:block;margin-top:4px;font-size:12px;color:var(--warn)}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.login{max-width:420px;margin:40px auto}
+
+/* detalhe */
+.detail{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:20px;align-items:start}
+.doc{padding:36px 40px}
+.doc-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:18px}
+.doc-head h2{font-size:18px;letter-spacing:.02em}
+.doc p{max-width:68ch}
+dl.dados{display:grid;grid-template-columns:200px 1fr;margin:18px 0;border-top:1px solid var(--line)}
+dl.dados dt,dl.dados dd{margin:0;padding:9px 0;border-bottom:1px solid var(--line)}
+dl.dados dt{color:var(--muted);font-size:13px;font-weight:600}
+table.equipe th,table.equipe td{padding:7px 10px}
+.legal{font-size:13.5px;color:var(--muted);border-left:3px solid var(--line);padding-left:14px}
+.sig{border-top:1px solid var(--ink);padding-top:8px;font-size:13px;max-width:320px;margin-top:34px}
+.sig b{display:block;font-size:14px}
+.stamp-ok{color:var(--ok);font-weight:600}
+.print-only{display:none}
+.side{display:grid;gap:16px;position:sticky;top:84px}
+.side h3{font-size:15px;margin-bottom:10px}
+.linkbox{display:flex;gap:8px}
+.linkbox input{font-family:var(--f-mono);font-size:12px}
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:13px}
+.timeline li{display:grid;grid-template-columns:12px 1fr;gap:10px}
+.timeline .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--line)}
+.dot.ok{background:var(--ok)}.dot.bad{background:var(--bad)}.dot.p{background:var(--warn)}.dot.a{background:var(--accent)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:6px;font-weight:500;z-index:9;max-width:90vw}
+
+@media (max-width:820px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .detail{grid-template-columns:1fr}
+  .side{position:static;order:-1}
+  .s2,.s3,.s4{grid-column:span 6}
+  .doc{padding:22px 18px}
+  dl.dados{grid-template-columns:1fr}
+  dl.dados dt{border-bottom:0;padding-bottom:0}
+  .cols-head{display:none}
+  .col-row{grid-template-columns:1fr 40px;padding:10px;border:1px solid var(--line);border-radius:6px}
+  .col-row .n{display:none}
+  .col-row .c-nome{grid-column:1;grid-row:1}
+  .col-row .x{grid-column:2;grid-row:1}
+  .col-row .c-mat,.col-row .c-cargo{grid-column:1 / span 2}
+}
+@media print{
+  @page{size:A4 portrait;margin:16mm 16mm}
+  :root{--ink:#000;--muted:#333;--line:#999;--surface:#fff;--bg:#fff;--ok:#1d6b35}
+  body{background:#fff;font-size:11pt}
+  header.top,.side,.demo-band,.toast,#status-note,.no-print{display:none !important}
+  main{padding:0;max-width:none}
+  .detail{display:block}
+  .card{border:0}
+  .doc{padding:0}
+  .print-only{display:table-cell}
+  table.equipe td,table.equipe th{border:1px solid #999}
+  table.equipe td.sigcell{width:30%;height:28px}
+  .pill{border:1px solid #999}
+  .stamp-box{display:flex !important}
+}
+.stamp-box{display:none;margin-top:28px;border:1px dashed #999;height:60px;width:55%;align-items:center;justify-content:center;font-size:9pt;color:#777}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="demo-band hidden" id="demo-band">Modo demonstração: os dados ficam só neste navegador. Configure o Supabase no arquivo config.js para usar de verdade.</div>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M9.5 1 3 9h4l-1 6 6.5-8h-4z" fill="currentColor"/></svg></div>
+      <div><h1>Autorização de Hora Extra</h1><small>Mariuá Construção e Energia</small></div>
+    </div>
+    <nav class="tabs" aria-label="Seções">
+      <a href="#nova" id="tab-nova">Nova solicitação</a>
+      <a href="#painel" id="tab-painel">Painel</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="status-note" class="note info hidden" role="status"></div>
+
+  <!-- ============ NOVA ============ -->
+  <section id="v-nova" class="hidden" aria-labelledby="h-nova">
+    <div class="card pad">
+      <h2 id="h-nova" style="font-size:20px;margin-bottom:4px">Termo de autorização prévia de hora extra</h2>
+      <p class="help" style="margin:0 0 22px">Preencha e envie. Você recebe um link para mandar ao gestor pelo WhatsApp; ele aprova pelo celular, sem precisar de login.</p>
+      <form id="form" novalidate>
+        <fieldset>
+          <legend>Quem está solicitando</legend>
+          <div class="grid">
+            <div class="f s3"><label for="solicitante_nome">Seu nome</label><input id="solicitante_nome" autocomplete="name" placeholder="Ex.: Raimundo Lopes (encarregado)"></div>
+            <div class="f s3"><label for="solicitante_contato">Seu WhatsApp <span class="opt">(opcional)</span></label><input id="solicitante_contato" type="tel" inputmode="tel" placeholder="(92) 99999-0000"></div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Equipe e local</legend>
+          <div class="grid">
+            <div class="f s2"><label for="base">Base</label><select id="base"><option value="">Selecione…</option></select></div>
+            <div class="f s2"><label for="contrato">Contrato</label><select id="contrato"><option value="">Selecione…</option></select></div>
+            <div class="f s2"><label for="municipio">Município</label><input id="municipio"></div>
+            <div class="f s2"><label for="equipe">Equipe / turma</label><input id="equipe" autocomplete="off" placeholder="Ex.: Turma 03 – Linha viva"></div>
+            <div class="f s2"><label for="viatura">Viatura / placa</label><input id="viatura" autocomplete="off" placeholder="Ex.: QZX-4E21"></div>
+            <div class="f s2"><label for="local_servico">Local do serviço</label><input id="local_servico" autocomplete="off" placeholder="Ex.: Alimentador 01Y2"></div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Colaboradores <span class="count" id="col-count"></span></legend>
+          <div class="cols-head" aria-hidden="true"><span>#</span><span>Nome completo</span><span>Matrícula</span><span>Cargo / função</span><span></span></div>
+          <div id="cols" class="cols"></div>
+          <div class="actions" style="margin-top:12px">
+            <button type="button" class="btn" id="btn-add-col">+ Adicionar colaborador</button>
+            <button type="button" class="btn" id="btn-paste-toggle">Colar lista da planilha</button>
+          </div>
+          <div id="paste-box" class="hidden" style="margin-top:12px">
+            <label for="paste">Cole as linhas copiadas do Excel: Nome, Matrícula, Cargo (uma pessoa por linha)</label>
+            <textarea id="paste" style="min-height:110px;margin-top:5px" placeholder="João da Silva Souza	004512	Eletricista de rede&#10;Carlos Pereira Lima	004633	Eletricista líder"></textarea>
+            <div class="actions" style="margin-top:8px"><button type="button" class="btn primary" id="btn-paste">Incluir na lista</button></div>
+          </div>
+          <datalist id="cargos"></datalist>
+        </fieldset>
+        <fieldset>
+          <legend>Hora extra prevista (vale para toda a equipe)</legend>
+          <div class="grid">
+            <div class="f s2"><label for="data">Data</label><input id="data" type="date"></div>
+            <div class="f s2"><label for="inicio">Início</label><input id="inicio" type="time" step="300"></div>
+            <div class="f s2"><label for="fim">Término</label><input id="fim" type="time" step="300"></div>
+            <div class="f"><div class="dur" id="dur" aria-live="polite">Informe início e término para calcular a duração.</div></div>
+            <div class="f s2"><label for="motivo_tipo">Tipo de motivo</label><select id="motivo_tipo"><option value="">Selecione…</option></select></div>
+            <div class="f s4"><label for="os">Nº OS / nota</label><input id="os" autocomplete="off" placeholder="Ex.: OS 2026-118734"></div>
+            <div class="f"><label for="motivo">Justificativa</label><textarea id="motivo" placeholder="Descreva o serviço e por que não pode ser feito dentro da jornada normal."></textarea></div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Gestor que vai aprovar</legend>
+          <div class="grid">
+            <div class="f s2"><label for="gestor_nome">Nome do gestor</label><input id="gestor_nome" autocomplete="off" placeholder="Ex.: Paulo Mendes"></div>
+            <div class="f s2"><label for="gestor_cargo">Cargo do gestor</label><input id="gestor_cargo" placeholder="Ex.: Supervisor de obras"></div>
+            <div class="f s2"><label for="gestor_contato">WhatsApp do gestor</label><input id="gestor_contato" type="tel" inputmode="tel" placeholder="(92) 99999-0000"></div>
+          </div>
+        </fieldset>
+        <div id="form-err" class="note bad hidden" role="alert" style="margin-bottom:14px"></div>
+        <div class="actions">
+          <button class="btn primary" type="submit" id="btn-enviar">Enviar para aprovação</button>
+          <button class="btn" type="reset">Limpar</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ DETALHE ============ -->
+  <section id="v-det" class="hidden" aria-label="Solicitação">
+    <div class="detail">
+      <article class="card doc" id="doc"></article>
+      <aside class="side">
+        <div class="card pad hidden" id="box-enviar">
+          <h3>Falta 1 passo: enviar ao gestor</h3>
+          <p style="margin:0 0 10px;font-size:14px">O sistema não envia sozinho. Toque no botão verde: o WhatsApp abre com a mensagem pronta para <b id="wa-dest"></b>. Depois é só apertar <b>Enviar</b> no WhatsApp.</p>
+          <div class="actions" style="margin-bottom:10px"><a class="btn wa" id="btn-wa" target="_blank" rel="noopener" style="width:100%;justify-content:center;padding:12px 16px;font-size:16px">Enviar pelo WhatsApp</a></div>
+          <p class="help" style="margin:0 0 6px">Ou copie o link e mande por outro meio:</p>
+          <div class="linkbox"><input id="link-aprovar" readonly aria-label="Link de aprovação"><button class="btn" type="button" data-copy="link-aprovar">Copiar</button></div>
+        </div>
+        <div class="card pad hidden" id="box-dec">
+          <h3>Aprovar esta hora extra?</h3>
+          <div class="f" style="margin-bottom:10px"><label for="dec-nome">Seu nome</label><input id="dec-nome" autocomplete="name"></div>
+          <div class="f" style="margin-bottom:12px"><label for="obs">Observação <span class="opt">(obrigatória para reprovar)</span></label><textarea id="obs" style="min-height:70px"></textarea></div>
+          <div class="actions"><button class="btn ok" id="btn-aprovar" type="button">Aprovar</button><button class="btn bad" id="btn-reprovar" type="button">Reprovar</button></div>
+          <p class="help" style="margin:10px 0 0">A decisão fica registrada com seu nome, data, hora e o aparelho usado.</p>
+        </div>
+        <div class="card pad" id="box-acomp">
+          <h3>Link para acompanhar</h3>
+          <div class="linkbox"><input id="link-ver" readonly aria-label="Link para acompanhar"><button class="btn" type="button" data-copy="link-ver">Copiar</button></div>
+          <p class="help" style="margin:8px 0 0">Guarde para consultar a situação e imprimir o termo. Este link não permite aprovar.</p>
+        </div>
+        <div class="card pad">
+          <h3>Histórico</h3>
+          <ol class="timeline" id="timeline"></ol>
+        </div>
+        <div class="card pad actions">
+          <button class="btn" id="btn-imprimir" type="button">Imprimir termo</button>
+          <button class="btn bad hidden" id="btn-cancelar" type="button">Cancelar solicitação</button>
+          <a class="btn" href="#nova">Nova solicitação</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ PAINEL ============ -->
+  <section id="v-painel" class="hidden" aria-label="Painel">
+    <div class="card pad login" id="painel-login">
+      <h2 style="font-size:18px;margin-bottom:6px">Painel de gestão</h2>
+      <p class="help" style="margin:0 0 14px">Acesso para RH e gestores. Informe o código do painel.</p>
+      <form id="form-login" class="actions" novalidate>
+        <input id="codigo" type="password" autocomplete="current-password" placeholder="Código do painel" aria-label="Código do painel" style="flex:1">
+        <button class="btn primary" type="submit">Entrar</button>
+      </form>
+      <div id="login-err" class="note bad hidden" style="margin-top:12px" role="alert"></div>
+    </div>
+    <div id="painel-body" class="hidden" style="display:grid;gap:20px">
+      <div class="stats">
+        <div class="card stat p"><b class="num" id="st-p">0</b><span>Aguardando aprovação</span></div>
+        <div class="card stat a"><b class="num" id="st-a">0</b><span>Aprovadas no mês</span></div>
+        <div class="card stat r"><b class="num" id="st-r">0</b><span>Reprovadas no mês</span></div>
+        <div class="card stat h"><b class="num" id="st-h">0h00</b><span>Homem-hora aprovado no mês</span></div>
+      </div>
+      <div class="card">
+        <div class="filters">
+          <input type="month" id="mes" aria-label="Mês">
+          <select id="f-base" aria-label="Base" style="width:auto"><option value="">Todas as bases</option></select>
+          <input type="search" id="q" placeholder="Buscar colaborador, matrícula, gestor ou protocolo" aria-label="Buscar">
+          <div class="actions" role="group" aria-label="Filtrar por status" style="gap:6px">
+            <button class="chip" data-f="pendente" aria-pressed="false">Pendentes</button>
+            <button class="chip" data-f="aprovado" aria-pressed="false">Aprovadas</button>
+            <button class="chip" data-f="reprovado" aria-pressed="false">Reprovadas</button>
+            <button class="chip" data-f="todas" aria-pressed="true">Todas</button>
+          </div>
+          <button class="btn sm" id="btn-atualizar" type="button">Atualizar</button>
+          <button class="btn sm" id="btn-csv" type="button">Exportar CSV</button>
+          <button class="btn sm" id="btn-sair" type="button">Sair</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Protocolo</th><th>Equipe</th><th>Data e horário</th><th>Base / contrato</th><th>Gestor</th><th>Status</th><th class="no-print">Aprovação</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="empty hidden" id="empty"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script>
+(() => {
+"use strict";
+const CFG = Object.assign({ CONTRATOS:[], MOTIVOS:[], CARGOS:[], EMPRESA:"MARIUA CONSTRUCAO E ENERGIA LTDA", MUNICIPIO_PADRAO:"Manaus" }, window.HE_CONFIG || {});
+const $ = (s) => document.querySelector(s);
+const LEGAL = 'Nos termos do art. 59 da CLT, a jornada diária poderá ser acrescida de, no máximo, 2 (duas) horas extras, limite que não pode ser excedido na hora extra aqui autorizada. Os colaboradores deverão registrar normalmente esta hora extra no sistema de controle de ponto. Este termo é um instrumento de controle interno e não substitui o registro de ponto, tampouco afeta o direito ao pagamento das horas efetivamente trabalhadas.';
+const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const LABEL = { pendente:'Pendente', aprovado:'Aprovada', reprovado:'Reprovada', cancelado:'Cancelada' };
+
+/* ---------- utilidades ---------- */
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hm = (t) => String(t||'').slice(0,5);
+const toMin = (t) => { t=hm(t); if(!/^\d{2}:\d{2}$/.test(t)) return null; const [h,m]=t.split(':').map(Number); return h*60+m; };
+function durMin(a,b){ const x=toMin(a), y=toMin(b); if(x==null||y==null) return null; let d=y-x; if(d<=0) d+=1440; return d; }
+const fmtDur = (m) => `${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}`;
+const fmtData = (d) => { if(!d) return '–'; const [y,m,dd]=String(d).slice(0,10).split('-'); return `${dd}/${m}/${y}`; };
+const fmtDataExt = (iso) => { const d=new Date(iso); return `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`; };
+const fmtTs = (iso) => { if(!iso) return ''; const d=new Date(iso); return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
+const norm = (s) => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+const chave = (nome, mat) => String(mat||'').trim() ? 'm:'+String(mat).trim().toLowerCase() : 'n:'+norm(nome);
+const hoje = () => new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+const baseUrl = () => location.href.split('#')[0];
+const linkPara = (id, token) => `${baseUrl()}#s=${encodeURIComponent(id)}&t=${encodeURIComponent(token)}`;
+const soDigitos = (s) => String(s||'').replace(/\D/g,'');
+function waNumero(s){ let d=soDigitos(s); if(!d) return ''; if(d.length<=11) d='55'+d; return d; }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.add('hidden'),3000); }
+function note(msg, kind='info'){ const n=$('#status-note'); if(!msg){ n.classList.add('hidden'); return; } n.className='note '+kind; n.textContent=msg; }
+const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }, del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+const sess = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} }, del(k){ try{ sessionStorage.removeItem(k); }catch(e){} } };
+
+/* ---------- backend ---------- */
+const REMOTE = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY);
+async function rpc(fn, args){
+  if(!REMOTE) return DEMO[fn](args);
+  let r;
+  try{
+    r = await fetch(`${CFG.SUPABASE_URL.replace(/\/$/,'')}/rest/v1/rpc/${fn}`, {
+      method:'POST', headers: Object.assign({ 'apikey':CFG.SUPABASE_ANON_KEY, 'Content-Type':'application/json' }, /^eyJ/.test(CFG.SUPABASE_ANON_KEY) ? { 'Authorization':'Bearer '+CFG.SUPABASE_ANON_KEY } : {}), body:JSON.stringify(args) });
+  }catch(e){ throw new Error('Sem conexão com o servidor. Verifique a internet e tente de novo.'); }
+  const txt = await r.text(); let body=null; try{ body = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!r.ok) throw new Error((body && body.message) || 'Erro no servidor ('+r.status+').');
+  return body;
+}
+
+/* modo demonstração: mesmas regras do banco, guardado no navegador */
+const DEMO = (() => {
+  const K='he_demo_db';
+  const all = () => store.get(K) || [];
+  const save = (a) => store.set(K, a);
+  const tok = () => Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  const pub = (s, t) => { const o={...s}; delete o.token_ver; delete o.token_aprovar; o.pode_decidir = t===s.token_aprovar; o.token_ver=s.token_ver; return o; };
+  const minDia = (data, ign) => { const m={}; for(const s of all()){ if(s.data!==data||s.id===ign||!['pendente','aprovado'].includes(s.status)) continue; for(const c of s.colaboradores){ const k=chave(c.nome,c.matricula); m[k]=(m[k]||0)+s.duracao_min; } } return m; };
+  const fail = (m) => { throw new Error(m); };
+  const find = (id) => all().find(s=>s.id===String(id||'').toUpperCase().trim());
+  return {
+    he_limite({p_data, p_colaboradores}){ const m=minDia(p_data); const r={}; for(const c of p_colaboradores||[]){ const k=chave(c.nome,c.matricula); if(m[k]) r[k]=m[k]; } return r; },
+    he_criar({p}){
+      for(const f of ['base','municipio','contrato','data','inicio','fim','motivo_tipo','motivo','solicitante_nome','gestor_nome','gestor_cargo','gestor_contato','equipe','viatura','local_servico','os']) if(!String(p[f]||'').trim()) fail('Campo obrigatório não preenchido: '+f);
+      if(p.motivo.trim().length<15) fail('Detalhe melhor a justificativa (mínimo de 15 caracteres).');
+      const d=durMin(p.inicio,p.fim); if(d>120) fail('A hora extra ultrapassa o limite de 2 horas por dia (art. 59 da CLT).');
+      if(!p.colaboradores.length) fail('Informe pelo menos um colaborador.');
+      const m=minDia(p.data), seen=new Set();
+      for(const c of p.colaboradores){ const k=chave(c.nome,c.matricula); if(seen.has(k)) fail('Colaborador repetido na lista: '+c.nome); seen.add(k); if((m[k]||0)+d>120) fail(`${c.nome} já tem ${m[k]} min de hora extra solicitada em ${fmtData(p.data)}. O total passaria de 2h (art. 59 da CLT).`); }
+      const now=new Date(); const id='HE'+String(now.getFullYear()).slice(2)+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+tok().slice(0,4).toUpperCase();
+      const s={...p, id, empresa:CFG.EMPRESA, criado_em:now.toISOString(), duracao_min:d, status:'pendente', token_ver:tok(), token_aprovar:tok()};
+      const a=all(); a.push(s); save(a); return {id, token_ver:s.token_ver, token_aprovar:s.token_aprovar};
+    },
+    he_obter({p_id,p_token}){ const s=find(p_id); if(!s||(p_token!==s.token_ver&&p_token!==s.token_aprovar)) fail('Solicitação não encontrada ou link inválido.'); return pub(s,p_token); },
+    he_decidir({p_id,p_token,p_status,p_nome,p_obs}){
+      const a=all(); const s=a.find(x=>x.id===p_id); if(!s||p_token!==s.token_aprovar) fail('Link de aprovação inválido.');
+      if(s.status!=='pendente') fail('Esta solicitação já está '+s.status+'.');
+      if(!String(p_nome||'').trim()) fail('Informe seu nome para registrar a decisão.');
+      if(p_status==='reprovado'&&String(p_obs||'').trim().length<5) fail('Informe o motivo da reprovação.');
+      Object.assign(s,{status:p_status, decidido_por:p_nome.trim(), decidido_em:new Date().toISOString(), decisao_obs:String(p_obs||'').trim()||null}); save(a); return pub(s,p_token);
+    },
+    he_cancelar({p_id,p_token}){ const a=all(); const s=a.find(x=>x.id===p_id); if(!s||(p_token!==s.token_ver&&p_token!==s.token_aprovar)) fail('Link inválido.'); if(s.status!=='pendente') fail('Só é possível cancelar solicitações pendentes.'); Object.assign(s,{status:'cancelado',cancelado_em:new Date().toISOString()}); save(a); return pub(s,p_token); },
+    he_listar({p_codigo,p_de,p_ate}){ if(p_codigo!=='demo') fail('Código do painel incorreto. (No modo demonstração o código é: demo)'); return all().filter(s=>(!p_de||s.data>=p_de)&&(!p_ate||s.data<=p_ate)).sort((x,y)=>y.criado_em.localeCompare(x.criado_em)); }
+  };
+})();
+
+/* ---------- roteamento ---------- */
+function parseHash(){ const h=location.hash.replace(/^#/,''); if(h.startsWith('s=')){ const p=new URLSearchParams(h); return {view:'det', id:p.get('s'), t:p.get('t')}; } return {view: h==='painel'?'painel':'nova'}; }
+function route(){
+  const r=parseHash();
+  ['nova','det','painel'].forEach(v=>$('#v-'+v).classList.toggle('hidden', v!==r.view));
+  $('#tab-nova').toggleAttribute('aria-current', r.view==='nova'); if(r.view==='nova') $('#tab-nova').setAttribute('aria-current','page');
+  $('#tab-painel').toggleAttribute('aria-current', r.view==='painel'); if(r.view==='painel') $('#tab-painel').setAttribute('aria-current','page');
+  note('');
+  if(r.view==='det') loadDetail(r.id, r.t);
+  if(r.view==='painel') initPainel();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', route);
+
+/* ---------- formulário ---------- */
+function fillSelect(sel, items){ for(const i of items){ const o=document.createElement('option'); o.textContent=i; sel.appendChild(o); } }
+const BASES = (CFG.BASES||[]).map(b=>typeof b==='string'?{nome:b,municipio:''}:b);
+fillSelect($('#base'), BASES.map(b=>b.nome)); fillSelect($('#f-base'), BASES.map(b=>b.nome));
+fillSelect($('#contrato'), CFG.CONTRATOS); fillSelect($('#motivo_tipo'), CFG.MOTIVOS);
+$('#base').addEventListener('change',()=>{ const b=BASES.find(x=>x.nome===$('#base').value); if(b&&b.municipio) $('#municipio').value=b.municipio; store.set('he_base',$('#base').value); });
+for(const c of CFG.CARGOS){ const o=document.createElement('option'); o.value=c; $('#cargos').appendChild(o); }
+function defaults(){
+  $('#municipio').value = CFG.MUNICIPIO_PADRAO; $('#data').value = hoje();
+  const ub=store.get('he_base'); if(ub && BASES.some(b=>b.nome===ub)){ $('#base').value=ub; const b=BASES.find(x=>x.nome===ub); if(b.municipio) $('#municipio').value=b.municipio; }
+  const me = store.get('he_solicitante'); if(me){ $('#solicitante_nome').value=me.nome||''; $('#solicitante_contato').value=me.contato||''; }
+}
+
+function addCol(c={}){
+  const row=document.createElement('div'); row.className='col-row';
+  row.innerHTML=`<span class="n"></span>
+    <input class="c-nome" aria-label="Nome do colaborador" placeholder="Nome completo" autocomplete="off">
+    <input class="c-mat" aria-label="Matrícula" placeholder="Matrícula *" autocomplete="off">
+    <input class="c-cargo" aria-label="Cargo" placeholder="Cargo / função" list="cargos" autocomplete="off">
+    <button type="button" class="x" aria-label="Remover colaborador" title="Remover">×</button>`;
+  row.querySelector('.c-nome').value=c.nome||''; row.querySelector('.c-mat').value=c.matricula||''; row.querySelector('.c-cargo').value=c.cargo||'';
+  row.querySelector('.x').addEventListener('click',()=>{ row.remove(); if(!$('#cols').children.length) addCol(); onChange(); });
+  row.addEventListener('input',onChange);
+  $('#cols').appendChild(row); renum(); return row;
+}
+function readCols(){ return [...$('#cols').children].map(r=>({nome:r.querySelector('.c-nome').value.trim(), matricula:r.querySelector('.c-mat').value.trim(), cargo:r.querySelector('.c-cargo').value.trim(), row:r})).filter(c=>c.nome||c.matricula||c.cargo); }
+function renum(){ [...$('#cols').children].forEach((r,i)=>r.querySelector('.n').textContent=i+1); const n=readCols().length; $('#col-count').textContent = n?`· ${n} informado${n>1?'s':''}`:''; }
+$('#btn-add-col').addEventListener('click',()=>{ const last=[...$('#cols').children].pop(); addCol({cargo:last?last.querySelector('.c-cargo').value:''}).querySelector('.c-nome').focus(); });
+$('#btn-paste-toggle').addEventListener('click',()=>{ $('#paste-box').classList.toggle('hidden'); if(!$('#paste-box').classList.contains('hidden')) $('#paste').focus(); });
+$('#btn-paste').addEventListener('click',()=>{
+  const lines=$('#paste').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean); let n=0;
+  [...$('#cols').children].forEach(r=>{ if(![...r.querySelectorAll('input')].some(i=>i.value.trim())) r.remove(); });
+  for(const l of lines){ const p=l.split(/\t|;/).map(x=>x.trim()); if(!p[0]||/^nome$/i.test(p[0])) continue; addCol({nome:p[0],matricula:p[1]||'',cargo:p[2]||''}); n++; }
+  if(!$('#cols').children.length) addCol();
+  $('#paste').value=''; $('#paste-box').classList.add('hidden'); onChange();
+  toast(n?`${n} colaborador${n>1?'es':''} incluído${n>1?'s':''}.`:'Nenhuma linha reconhecida.');
+});
+
+let limite = {}; let limiteT; let limiteReq=0;
+function onChange(){ renum(); updDur(); clearTimeout(limiteT); limiteT=setTimeout(buscarLimite, 500); }
+async function buscarLimite(){
+  const cols=readCols().filter(c=>c.nome); const data=$('#data').value;
+  if(!cols.length||!data){ limite={}; updDur(); return; }
+  const my=++limiteReq;
+  try{ const r=await rpc('he_limite',{p_data:data, p_colaboradores:cols.map(c=>({nome:c.nome,matricula:c.matricula}))}); if(my===limiteReq){ limite=r||{}; updDur(); } }catch(e){}
+}
+function excedentes(){ const m=durMin($('#inicio').value,$('#fim').value); if(m==null) return []; return readCols().filter(c=>c.nome).map(c=>({...c, ja:limite[chave(c.nome,c.matricula)]||0})).filter(c=>c.ja+m>120); }
+function updDur(){
+  const box=$('#dur'); const m=durMin($('#inicio').value,$('#fim').value);
+  box.className='dur'; [...$('#cols').children].forEach(r=>r.classList.remove('over'));
+  if(m==null){ box.textContent='Informe início e término para calcular a duração.'; return; }
+  const n=readCols().filter(c=>c.nome).length;
+  if(m>120){ box.classList.add('over'); box.textContent=`Duração: ${fmtDur(m)}. Acima do limite de 2h por dia (art. 59 da CLT).`; return; }
+  const ex=excedentes();
+  if(ex.length){ ex.forEach(c=>c.row.classList.add('over')); box.classList.add('over'); box.textContent=`Duração: ${fmtDur(m)}. Ultrapassa 2h no dia para: ${ex.map(c=>`${c.nome} (já tem ${fmtDur(c.ja)} solicitadas)`).join(', ')}.`; return; }
+  box.classList.add('ok'); box.textContent=`Duração: ${fmtDur(m)} por pessoa${n>1?` · ${n} colaboradores = ${fmtDur(m*n)} homem-hora`:''}. Dentro do limite de 2h por dia.`;
+}
+['inicio','fim'].forEach(id=>$('#'+id).addEventListener('input',updDur));
+$('#data').addEventListener('change',onChange);
+$('#form').addEventListener('reset',()=>setTimeout(()=>{ $('#cols').innerHTML=''; addCol(); defaults(); $('#form-err').classList.add('hidden'); limite={}; updDur(); },0));
+
+function showErr(msg){ const b=$('#form-err'); b.textContent=msg; b.classList.remove('hidden'); b.scrollIntoView({block:'center',behavior:'smooth'}); }
+$('#form').addEventListener('submit', async (e)=>{
+  e.preventDefault(); $('#form-err').classList.add('hidden');
+  const v=(id)=>$('#'+id).value.trim();
+  const req={solicitante_nome:'Seu nome',base:'Base',contrato:'Contrato',municipio:'Município',data:'Data',inicio:'Início',fim:'Término',motivo_tipo:'Tipo de motivo',motivo:'Justificativa',gestor_nome:'Nome do gestor',gestor_cargo:'Cargo do gestor',gestor_contato:'WhatsApp do gestor',equipe:'Equipe / turma',viatura:'Viatura / placa',local_servico:'Local do serviço',os:'Nº OS / nota'};
+  const errs=Object.keys(req).filter(k=>!v(k)).map(k=>req[k]);
+  const cols=readCols(); if(!cols.length) errs.push('pelo menos um colaborador');
+  if(errs.length) return showErr('Preencha: '+errs.join(', ')+'.');
+  const inc=cols.filter(c=>!c.nome||!c.cargo||!c.matricula); if(inc.length){ inc.forEach(c=>c.row.classList.add('over')); return showErr('Informe nome, matrícula e cargo de todos os colaboradores.'); }
+  if(soDigitos(v('gestor_contato')).length<10) return showErr('WhatsApp do gestor inválido. Informe com DDD, ex.: (75) 99999-0000.');
+  const seen=new Set(); for(const c of cols){ const k=chave(c.nome,c.matricula); if(seen.has(k)) return showErr('Colaborador repetido na lista: '+c.nome+'.'); seen.add(k); }
+  const m=durMin(v('inicio'),v('fim')); if(m>120) return showErr('A hora extra ultrapassa o limite de 2 horas por dia (art. 59 da CLT). Ajuste o horário.');
+  if(v('motivo').length<15) return showErr('Detalhe melhor a justificativa (mínimo de 15 caracteres).');
+  const p={ base:v('base'), municipio:v('municipio'), contrato:v('contrato'), equipe:v('equipe'), viatura:v('viatura'), local_servico:v('local_servico'),
+    data:v('data'), inicio:v('inicio'), fim:v('fim'), motivo_tipo:v('motivo_tipo'), os:v('os'), motivo:v('motivo'),
+    colaboradores:cols.map(c=>({nome:c.nome,matricula:c.matricula,cargo:c.cargo})),
+    solicitante_nome:v('solicitante_nome'), solicitante_contato:v('solicitante_contato'),
+    gestor_nome:v('gestor_nome'), gestor_cargo:v('gestor_cargo'), gestor_contato:v('gestor_contato') };
+  const btn=$('#btn-enviar'); btn.disabled=true; btn.textContent='Enviando…';
+  try{
+    const r = await rpc('he_criar',{p});
+    store.set('he_solicitante',{nome:p.solicitante_nome, contato:p.solicitante_contato});
+    sess.set('apr:'+r.id, r.token_aprovar);
+    $('#form').reset();
+    location.hash = `s=${encodeURIComponent(r.id)}&t=${encodeURIComponent(r.token_ver)}`;
+    toast('Solicitação registrada. Agora envie o link ao gestor.');
+  }catch(err){ showErr(err.message); }
+  finally{ btn.disabled=false; btn.textContent='Enviar para aprovação'; }
+});
+
+/* ---------- detalhe ---------- */
+let cur=null, curToken=null;
+async function loadDetail(id, t){
+  cur=null; curToken=t;
+  $('#doc').innerHTML='<p class="empty">Carregando solicitação…</p>';
+  ['box-enviar','box-dec','btn-cancelar'].forEach(x=>$('#'+x).classList.add('hidden')); $('#timeline').innerHTML='';
+  try{ cur = await rpc('he_obter',{p_id:id, p_token:t}); renderDetail(); }
+  catch(e){ $('#doc').innerHTML=`<p class="empty">${esc(e.message)}<br>Confira se o link foi copiado inteiro.</p>`; }
+}
+function renderDetail(){
+  const s=cur; const cols=s.colaboradores||[]; const dm=s.duracao_min ?? durMin(s.inicio,s.fim); const st=s.status;
+  const aposInicio = st==='pendente' && new Date(s.criado_em) > new Date(`${String(s.data).slice(0,10)}T${hm(s.inicio)}:00`);
+  $('#doc').innerHTML = `${aposInicio?'<div class="note warn no-print" style="margin-bottom:14px">Solicitação registrada depois do horário previsto de início. A autorização deveria ser prévia.</div>':''}
+    <div class="doc-head"><div><h2>TERMO DE AUTORIZAÇÃO PRÉVIA DE HORA EXTRA</h2><div class="help" style="margin-top:4px">Protocolo <span class="mono">${esc(s.id)}</span></div></div><span class="pill ${st}">${LABEL[st]}</span></div>
+    <p>Declaramos, para os devidos fins, que a realização de hora extra abaixo identificada foi previamente solicitada e ${st==='aprovado'?'<b>autorizada</b>':st==='reprovado'?'<b>não autorizada</b>':'submetida à autorização'} pelo gestor imediato, conforme os dados a seguir:</p>
+    <dl class="dados">
+      <dt>Empresa</dt><dd>${esc(s.empresa)}</dd>
+      <dt>Município</dt><dd>${esc(s.municipio)}</dd>
+      ${s.base?`<dt>Base</dt><dd><b>${esc(s.base)}</b></dd>`:''}
+      <dt>Contrato</dt><dd>${esc(s.contrato)}${s.equipe?` · ${esc(s.equipe)}`:''}${s.viatura?` · Viatura ${esc(s.viatura)}`:''}</dd>
+      ${s.local_servico?`<dt>Local do serviço</dt><dd>${esc(s.local_servico)}</dd>`:''}
+      <dt>Data e horário previsto</dt><dd class="num">${fmtData(s.data)}, das ${hm(s.inicio)} às ${hm(s.fim)} (${fmtDur(dm)})</dd>
+      <dt>Motivo</dt><dd><b>${esc(s.motivo_tipo)}</b>${s.os?` · ${esc(s.os)}`:''}<br>${esc(s.motivo)}</dd>
+      <dt>Colaboradores</dt><dd>${cols.length} pessoa${cols.length>1?'s':''} · ${fmtDur(dm*cols.length)} homem-hora</dd>
+    </dl>
+    <div class="tbl-wrap"><table class="equipe"><thead><tr><th>#</th><th>Nome</th><th>Matrícula</th><th>Cargo / função</th><th class="print-only">Assinatura</th></tr></thead><tbody>
+      ${cols.map((c,i)=>`<tr><td class="num">${i+1}</td><td><b>${esc(c.nome)}</b></td><td class="num">${esc(c.matricula||'–')}</td><td>${esc(c.cargo)}</td><td class="print-only sigcell"></td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="legal">${esc(LEGAL)} Por ser expressão da verdade, firmamos a presente declaração.</p>
+    <p>${esc(s.municipio)}, ${fmtDataExt(s.criado_em)}.</p>
+    <div class="sig"><b>${esc(st==='aprovado'||st==='reprovado' ? s.decidido_por : s.gestor_nome)}</b>${esc(s.gestor_cargo)}<br>
+      ${st==='aprovado'?`<span class="stamp-ok">Aprovado eletronicamente em ${fmtTs(s.decidido_em)}</span>`:st==='reprovado'?`<span style="color:var(--bad);font-weight:600">Reprovado em ${fmtTs(s.decidido_em)}</span>`:'<span class="help">Aguardando decisão</span>'}</div>
+    <div class="stamp-box">Carimbo da empresa (CNPJ)</div>`;
+
+  const tl=[`<li><span class="dot a"></span><div><b>Solicitada</b> por ${esc(s.solicitante_nome)}<br><span class="help">${fmtTs(s.criado_em)}</span></div></li>`];
+  if(st==='aprovado'||st==='reprovado') tl.push(`<li><span class="dot ${st==='aprovado'?'ok':'bad'}"></span><div><b>${LABEL[st]}</b> por ${esc(s.decidido_por)}<br><span class="help">${fmtTs(s.decidido_em)}</span>${s.decisao_obs?`<div style="margin-top:4px">“${esc(s.decisao_obs)}”</div>`:''}</div></li>`);
+  else if(st==='cancelado') tl.push(`<li><span class="dot"></span><div><b>Cancelada</b><br><span class="help">${fmtTs(s.cancelado_em)}</span></div></li>`);
+  else tl.push(`<li><span class="dot p"></span><div><b>Aguardando</b> ${esc(s.gestor_nome)}</div></li>`);
+  $('#timeline').innerHTML=tl.join('');
+
+  const pend = st==='pendente';
+  $('#link-ver').value = linkPara(s.id, s.token_ver);
+  // caixa de envio: só para quem acabou de criar (token de aprovação guardado nesta aba) ou via painel
+  const tApr = s.pode_decidir ? curToken : sess.get('apr:'+s.id);
+  const mostrarEnvio = pend && tApr && !s.pode_decidir;
+  $('#box-enviar').classList.toggle('hidden', !mostrarEnvio);
+  if(mostrarEnvio){
+    const link=linkPara(s.id, tApr);
+    $('#link-aprovar').value=link;
+    const msg=`*Autorização de hora extra* – ${s.id}\n${cols.length} colaborador${cols.length>1?'es':''}${s.equipe?` (${s.equipe})`:''}\n${fmtData(s.data)}, ${hm(s.inicio)}–${hm(s.fim)}\nBase: ${s.base||'-'} · ${s.contrato}\nMotivo: ${s.motivo_tipo}\nSolicitante: ${s.solicitante_nome}\n\nAprovar ou reprovar: ${link}`;
+    const num=waNumero(s.gestor_contato); $('#wa-dest').textContent = s.gestor_nome + (s.gestor_contato ? ' ('+s.gestor_contato+')' : '');
+    $('#btn-wa').href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+  }
+  $('#box-dec').classList.toggle('hidden', !(pend && s.pode_decidir));
+  if(pend && s.pode_decidir){ if(!$('#dec-nome').value) $('#dec-nome').value = store.get('he_gestor_nome') || s.gestor_nome || ''; $('#obs').value=''; }
+  $('#btn-cancelar').classList.toggle('hidden', !pend);
+}
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click', async ()=>{ const i=$('#'+b.dataset.copy); try{ await navigator.clipboard.writeText(i.value); toast('Link copiado.'); }catch(e){ i.select(); document.execCommand && document.execCommand('copy'); toast('Link copiado.'); } }));
+async function decidir(status){
+  if(!cur) return;
+  const nome=$('#dec-nome').value.trim(), obs=$('#obs').value.trim();
+  if(!nome){ toast('Informe seu nome.'); $('#dec-nome').focus(); return; }
+  if(status==='reprovado'&&obs.length<5){ toast('Informe o motivo da reprovação.'); $('#obs').focus(); return; }
+  const ba=$('#btn-aprovar'), br=$('#btn-reprovar'); ba.disabled=br.disabled=true;
+  try{ cur = await rpc('he_decidir',{p_id:cur.id,p_token:curToken,p_status:status,p_nome:nome,p_obs:obs}); store.set('he_gestor_nome',nome); renderDetail(); toast(status==='aprovado'?'Hora extra aprovada.':'Solicitação reprovada.'); }
+  catch(e){ toast(e.message); }
+  finally{ ba.disabled=br.disabled=false; }
+}
+$('#btn-aprovar').addEventListener('click',()=>decidir('aprovado'));
+$('#btn-reprovar').addEventListener('click',()=>decidir('reprovado'));
+$('#btn-cancelar').addEventListener('click', async ()=>{
+  const b=$('#btn-cancelar'); if(b.dataset.c!=='1'){ b.dataset.c='1'; b.textContent='Confirmar cancelamento'; setTimeout(()=>{ b.dataset.c=''; b.textContent='Cancelar solicitação'; },4000); return; }
+  b.dataset.c=''; b.textContent='Cancelar solicitação';
+  try{ cur = await rpc('he_cancelar',{p_id:cur.id,p_token:curToken}); renderDetail(); toast('Solicitação cancelada.'); }catch(e){ toast(e.message); }
+});
+$('#btn-imprimir').addEventListener('click',()=>window.print());
+
+/* ---------- painel ---------- */
+const P = { lista:[], filtro:'todas', q:'' };
+function mesAtual(){ return hoje().slice(0,7); }
+function initPainel(){
+  if(!$('#mes').value) $('#mes').value = mesAtual();
+  const cod = sess.get('he_codigo');
+  if(cod){ $('#painel-login').classList.add('hidden'); $('#painel-body').classList.remove('hidden'); carregarPainel(); }
+  else { $('#painel-login').classList.remove('hidden'); $('#painel-body').classList.add('hidden'); setTimeout(()=>$('#codigo').focus(),50); }
+}
+$('#form-login').addEventListener('submit', async (e)=>{
+  e.preventDefault(); const cod=$('#codigo').value.trim(); if(!cod) return;
+  try{ await rpc('he_listar',{p_codigo:cod, p_de:hoje(), p_ate:hoje()}); sess.set('he_codigo',cod); $('#codigo').value=''; $('#login-err').classList.add('hidden'); initPainel(); }
+  catch(err){ $('#login-err').textContent=err.message; $('#login-err').classList.remove('hidden'); }
+});
+$('#btn-sair').addEventListener('click',()=>{ sess.del('he_codigo'); initPainel(); });
+async function carregarPainel(){
+  const mes=$('#mes').value||mesAtual(); const [y,m]=mes.split('-').map(Number);
+  const de=`${mes}-01`; const ate=`${mes}-${String(new Date(y,m,0).getDate()).padStart(2,'0')}`;
+  $('#empty').textContent='Carregando…'; $('#empty').classList.remove('hidden'); $('#rows').innerHTML='';
+  try{ P.lista = await rpc('he_listar',{p_codigo:sess.get('he_codigo'), p_de:de, p_ate:ate}) || []; renderPainel(); }
+  catch(e){ if(/código/i.test(e.message)){ sess.del('he_codigo'); initPainel(); } else { $('#empty').textContent=e.message; } }
+}
+function porBase(){ const b=$('#f-base').value; return b ? P.lista.filter(s=>s.base===b) : P.lista; }
+function filtrados(){
+  const q=norm(P.q);
+  return porBase().filter(s=>{ if(P.filtro!=='todas'&&s.status!==P.filtro) return false; if(!q) return true;
+    return norm([s.id,s.base,s.contrato,s.equipe,s.viatura,s.gestor_nome,s.solicitante_nome,s.os,s.local_servico,...(s.colaboradores||[]).flatMap(c=>[c.nome,c.matricula,c.cargo])].join(' ')).includes(q); });
+}
+function renderPainel(){
+  let p=0,a=0,r=0,h=0;
+  for(const s of porBase()){ if(s.status==='pendente') p++; if(s.status==='aprovado'){ a++; h+=s.duracao_min*(s.colaboradores||[]).length; } if(s.status==='reprovado') r++; }
+  $('#st-p').textContent=p; $('#st-a').textContent=a; $('#st-r').textContent=r; $('#st-h').textContent=fmtDur(h);
+  const arr=filtrados();
+  $('#rows').innerHTML = arr.map(s=>{ const cols=s.colaboradores||[];
+    return `<tr data-id="${esc(s.id)}" data-t="${esc(s.token_ver)}" tabindex="0">
+      <td class="mono">${esc(s.id)}</td>
+      <td><b>${esc(cols.length===1?cols[0].nome:`${cols[0]?cols[0].nome:''} + ${cols.length-1}`)}</b><div class="sub">${cols.length} colaborador${cols.length>1?'es':''}${s.equipe?' · '+esc(s.equipe):''}</div></td>
+      <td class="num">${fmtData(s.data)}<div class="sub">${hm(s.inicio)}–${hm(s.fim)} · ${fmtDur(s.duracao_min)}</div></td>
+      <td><b>${esc(s.base||'–')}</b><div class="sub">${esc(s.contrato)} · ${esc(s.motivo_tipo)}</div></td>
+      <td>${esc(s.gestor_nome)}${s.decidido_por&&s.decidido_por!==s.gestor_nome?`<div class="sub">Decidido por ${esc(s.decidido_por)}</div>`:''}</td>
+      <td><span class="pill ${s.status}">${LABEL[s.status]}</span></td>
+      <td class="no-print">${s.status==='pendente'?`<div class="actions" style="gap:6px;flex-wrap:nowrap"><button class="btn sm ok" type="button" data-abrir="${esc(s.id)}">Abrir para aprovar</button><button class="btn sm" type="button" data-apr="${esc(s.id)}">Copiar link</button></div>`:''}</td></tr>`; }).join('');
+  $('#empty').classList.toggle('hidden', arr.length>0);
+  $('#empty').textContent = P.lista.length ? 'Nenhuma solicitação com esses filtros.' : 'Nenhuma solicitação neste mês.';
+}
+$('#rows').addEventListener('click', async e=>{
+  const ab=e.target.closest('[data-abrir]');
+  if(ab){ e.stopPropagation(); const s=P.lista.find(x=>x.id===ab.dataset.abrir); location.hash=`s=${encodeURIComponent(s.id)}&t=${encodeURIComponent(s.token_aprovar)}`; return; }
+  const b=e.target.closest('[data-apr]');
+  if(b){ e.stopPropagation(); const s=P.lista.find(x=>x.id===b.dataset.apr); try{ await navigator.clipboard.writeText(linkPara(s.id,s.token_aprovar)); toast('Link de aprovação copiado.'); }catch(err){ toast('Não foi possível copiar.'); } return; }
+  const tr=e.target.closest('tr[data-id]'); if(tr) location.hash=`s=${encodeURIComponent(tr.dataset.id)}&t=${encodeURIComponent(tr.dataset.t)}`;
+});
+$('#rows').addEventListener('keydown', e=>{ if(e.key==='Enter'){ const tr=e.target.closest('tr[data-id]'); if(tr) location.hash=`s=${encodeURIComponent(tr.dataset.id)}&t=${encodeURIComponent(tr.dataset.t)}`; } });
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{ P.filtro=c.dataset.f; document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',String(x===c))); renderPainel(); }));
+$('#q').addEventListener('input',e=>{ P.q=e.target.value; renderPainel(); });
+$('#mes').addEventListener('change',carregarPainel);
+$('#f-base').addEventListener('change',renderPainel);
+$('#btn-atualizar').addEventListener('click',carregarPainel);
+$('#btn-csv').addEventListener('click',()=>{
+  const q=(x)=>'"'+String(x??'').replace(/"/g,'""')+'"';
+  const head=['Protocolo','Status','Base','Colaborador','Matrícula','Cargo','Equipe','Viatura','Contrato','Município','Local','Data','Início','Término','Horas','Tipo de motivo','OS','Justificativa','Solicitante','Gestor','Decidido por','Decidido em','Observação','Solicitado em'];
+  const lines=filtrados().flatMap(s=>(s.colaboradores||[]).map(c=>[s.id,LABEL[s.status],s.base,c.nome,c.matricula,c.cargo,s.equipe,s.viatura,s.contrato,s.municipio,s.local_servico,fmtData(s.data),hm(s.inicio),hm(s.fim),(s.duracao_min/60).toFixed(2).replace('.',','),s.motivo_tipo,s.os,s.motivo,s.solicitante_nome,s.gestor_nome,s.decidido_por,fmtTs(s.decidido_em),s.decisao_obs,fmtTs(s.criado_em)].map(q).join(';')));
+  const blob=new Blob(['﻿'+[head.map(q).join(';'),...lines].join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Horas_Extras_${$('#mes').value||mesAtual()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+});
+
+/* ---------- início ---------- */
+if(!REMOTE) $('#demo-band').classList.remove('hidden');
+addCol(); defaults();
+if(!location.hash) history.replaceState(null,'','#nova');
+route();
+})();
+</script>
+</body>
+</html>
