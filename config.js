@@ -1,6 +1,6 @@
 /* =====================================================================
    CONFIGURAÇÃO DO SISTEMA DE HORA EXTRA – MARIUÁ
-   Edite só este arquivo. Depois de salvar, publique a pasta de novo.
+   Edite só este arquivo (no GitHub: rhmariua/horaextra > config.js).
 
    Sem SUPABASE_URL/KEY o sistema abre em MODO DEMONSTRAÇÃO
    (dados ficam só no navegador de quem está testando).
@@ -21,6 +21,7 @@ window.HE_CONFIG = {
     { nome: "Irecê",            municipio: "Irecê - BA" },
     { nome: "Itajubá",          municipio: "Itajubá - MG" },
     { nome: "Jacobina",         municipio: "Jacobina - BA" },
+    { nome: "Manaus",           municipio: "Manaus - AM" },
     { nome: "Serrinha",         municipio: "Serrinha - BA" }
   ],
 
@@ -28,6 +29,7 @@ window.HE_CONFIG = {
     "Energisa Aracaju",
     "Neoenergia Coelba",
     "Cemig",
+    "Obras MRV Manaus",
     "Frota",
     "Administrativo",
     "Outro"
