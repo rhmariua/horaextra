@@ -8,11 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<script>document.write('<script src="config.js?v='+Date.now()+'"><\/script>');</script>
+<script>document.write('<script src="config.js?v='+Date.now()+'"><\/script><script src="timbrado.js?v=1"><\/script>');</script>
 <style>
 :root{
   --bg:#eef1f2; --surface:#ffffff; --ink:#14212c; --muted:#5b6b78; --line:#d5dde2;
-  --accent:#0b6b70; --accent-ink:#ffffff; --accent-soft:#e1f0f0;
+  --accent:#007c83; --accent-ink:#ffffff; --accent-soft:#e0f3f4;
   --ok:#1d7a3e; --ok-soft:#e3f3e8; --warn:#9a6400; --warn-soft:#fbf0d9; --bad:#b3261e; --bad-soft:#fbe5e3; --off:#6b7680; --off-soft:#eceff1;
   --wa:#1f8f4e;
   --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
@@ -40,10 +40,18 @@ a{color:var(--accent)}
 .num{font-variant-numeric:tabular-nums}
 .hidden{display:none !important}
 
-header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header.top{background:var(--surface);border-top:5px solid #00979e;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 .top-in{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;margin-right:auto}
-.brand-mark{width:30px;height:30px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+.brand-logo{height:38px;width:auto;display:block}
+.brand-sep{width:1px;align-self:stretch;background:var(--line);margin:2px 4px}
+img[data-timbre]:not([src]){display:none}
+.pt-img{display:none}
+.pwrap{display:block;width:100%;font-size:inherit;border-collapse:collapse}
+.pwrap>tbody,.pwrap>tbody>tr,.pwrap>tbody>tr>td{display:block}
+.pwrap>thead,.pwrap>tfoot{display:none}
+.pwrap td{padding:0;border:0}
+@media (max-width:560px){.brand-logo{height:30px}.brand-sep{display:none}}
 .brand h1{font-size:17px}
 .brand small{display:block;color:var(--muted);font:500 12px var(--f-body)}
 nav.tabs{display:flex;gap:4px}
@@ -164,19 +172,31 @@ table.equipe th,table.equipe td{padding:7px 10px}
   .col-row .c-mat,.col-row .c-cargo{grid-column:1 / span 2}
 }
 @media print{
-  @page{size:A4 portrait;margin:16mm 16mm}
+  @page{size:A4 portrait;margin:0}
+  .pt-img{display:block !important;position:fixed;left:0;width:210mm;height:auto}
+  .pt-topo{top:0}.pt-rodape{bottom:0}
+  .pwrap{display:table}
+  .pwrap>thead{display:table-header-group}.pwrap>tfoot{display:table-footer-group}
+  .pwrap>tbody{display:table-row-group}.pwrap>tbody>tr{display:table-row}.pwrap>tbody>tr>td{display:table-cell;padding:0 16mm}
+  .pw-t{height:28mm}.pw-b{height:30mm}
   :root{--ink:#000;--muted:#333;--line:#999;--surface:#fff;--bg:#fff;--ok:#1d6b35}
-  body{background:#fff;font-size:11pt}
+  body{background:#fff;font-size:10pt}
+  .sig{margin-top:22px}
+  table.equipe th,table.equipe td{padding:4px 8px}
   header.top,.side,.demo-band,.toast,#status-note,.no-print{display:none !important}
   main{padding:0;max-width:none}
   .detail{display:block}
   .card{border:0}
   .doc{padding:0}
+  dl.dados{grid-template-columns:44mm 1fr;margin:10px 0}
+  dl.dados dt,dl.dados dd{padding:4px 0;border-bottom:1px solid var(--line)}
+  dl.dados dt{font-size:9pt}
+  .doc-head{padding-bottom:8px;margin-bottom:10px}
   .print-only{display:table-cell}
   table.equipe td,table.equipe th{border:1px solid #999}
   table.equipe td.sigcell{width:30%;height:28px}
   .pill{border:1px solid #999}
-  .stamp-box{display:flex !important}
+  .stamp-box{display:flex !important;margin-top:12px;height:48px}
 }
 .stamp-box{display:none;margin-top:28px;border:1px dashed #999;height:60px;width:55%;align-items:center;justify-content:center;font-size:9pt;color:#777}
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
@@ -187,8 +207,8 @@ table.equipe th,table.equipe td{padding:7px 10px}
 <header class="top">
   <div class="top-in">
     <div class="brand">
-      <div class="brand-mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M9.5 1 3 9h4l-1 6 6.5-8h-4z" fill="currentColor"/></svg></div>
-      <div><h1>Autorização de Hora Extra</h1><small>Mariuá Construção e Energia</small></div>
+      <img class="brand-logo" data-timbre="logo" alt="Mariuá Construção e Energia"><span class="brand-sep" aria-hidden="true"></span>
+      <div><h1>Autorização de Hora Extra</h1><small>Recursos Humanos · Mariuá</small></div>
     </div>
     <nav class="tabs" aria-label="Seções">
       <a href="#nova" id="tab-nova">Nova solicitação</a>
@@ -197,6 +217,8 @@ table.equipe th,table.equipe td{padding:7px 10px}
   </div>
 </header>
 
+<img class="pt-img pt-topo" data-timbre="topo" alt=""><img class="pt-img pt-rodape" data-timbre="rodape" alt="">
+<table class="pwrap" role="presentation"><thead><tr><td><div class="pw-t"></div></td></tr></thead><tfoot><tr><td><div class="pw-b"></div></td></tr></tfoot><tbody><tr><td>
 <main>
   <div id="status-note" class="note info hidden" role="status"></div>
 
@@ -351,9 +373,11 @@ table.equipe th,table.equipe td{padding:7px 10px}
     </div>
   </section>
 </main>
+</td></tr></tbody></table>
 <div class="toast hidden" id="toast" role="status"></div>
 
 <script>
+if(window.TIMBRE)document.querySelectorAll('img[data-timbre]').forEach(function(im){var v=window.TIMBRE[im.dataset.timbre];if(v)im.src=v;});
 (() => {
 "use strict";
 const CFG = Object.assign({ CONTRATOS:[], MOTIVOS:[], CARGOS:[], EMPRESA:"MARIUA CONSTRUCAO E ENERGIA LTDA", MUNICIPIO_PADRAO:"Manaus" }, window.HE_CONFIG || {});
